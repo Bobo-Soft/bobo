@@ -165,6 +165,42 @@
     .platform-grid{grid-template-columns:1fr;}
   }
 
+  /* ---- Install Guide ---- */
+  .steps-list{
+    max-width:680px;margin:36px auto 0;
+    text-align:left;display:flex;flex-direction:column;gap:14px;
+  }
+  .step-item{
+    display:flex;gap:16px;align-items:flex-start;
+    background:var(--bg2);border:1px solid var(--line);
+    border-radius:12px;padding:18px 20px;
+    transition:.18s;
+  }
+  .step-item:hover{border-color:var(--gold);}
+  .step-num{
+    background:linear-gradient(135deg,var(--gold),var(--gold-light));
+    color:#0e0c0a;font-weight:700;font-size:14px;
+    width:30px;height:30px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;margin-top:2px;
+  }
+  .step-text{font-size:14px;color:var(--text);line-height:1.75;}
+  .step-text strong{color:var(--gold-light);}
+  .step-path{
+    font-size:12px;color:var(--muted);
+    background:var(--bg3);border:1px solid var(--line);
+    border-radius:6px;padding:8px 12px;margin-top:8px;
+    display:block;line-height:1.9;
+  }
+  .safety-box{
+    max-width:680px;margin:28px auto 0;
+    background:#0e1a12;border:1px solid #2a4a35;
+    border-radius:12px;padding:18px 22px;
+    font-size:13px;color:#7abf9a;line-height:1.75;
+    text-align:left;
+  }
+  .safety-box strong{color:#9ade9a;}
+
   /* ---- Footer ---- */
   footer{
     text-align:center;padding:46px 32px;
@@ -211,7 +247,7 @@
       <span class="btn-note" data-i18n="hero_note"></span>
     </div>
     <div style="text-align:center;">
-      <a class="btn-android" href="BOBO_Browser_Android.apk" download data-i18n="btn_download_android"></a>
+      <a class="btn-android" href="downloads/bobo_browser_1.5.apk" download data-i18n="btn_download_android"></a>
       <span class="btn-note" data-i18n="hero_note_android"></span>
     </div>
   </div>
@@ -299,11 +335,42 @@
       <div class="plat-icon">📱</div>
       <h3>Android <span class="badge-beta" data-i18n="badge_beta"></span></h3>
       <p class="plat-req" data-i18n="plat_and_req"></p>
-      <a class="btn-android" href="BOBO_Browser_Android.apk" download data-i18n="btn_download_android"></a>
+      <a class="btn-android" href="downloads/bobo_browser_1.5.apk" download data-i18n="btn_download_android"></a>
       <span class="plat-note" data-i18n="android_note"></span>
     </div>
   </div>
 </section>
+
+<!-- ===== INSTALL GUIDE ===== -->
+<div class="privacy">
+<section class="center">
+  <h2 data-i18n="install_h"></h2>
+  <p class="lead" data-i18n="install_intro"></p>
+  <div class="steps-list">
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <div class="step-text" data-i18n-html="step1"></div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <div class="step-text" data-i18n-html="step2"></div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div class="step-text" data-i18n-html="step3"></div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">4</div>
+      <div class="step-text" data-i18n-html="step4"></div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">5</div>
+      <div class="step-text" data-i18n-html="step5"></div>
+    </div>
+  </div>
+  <div class="safety-box" data-i18n-html="safety_text"></div>
+</section>
+</div>
 
 <!-- ===== FOOTER ===== -->
 <footer>
@@ -319,7 +386,7 @@ const I18N = {
     btn_download:"Descarcă pentru Windows",
     hero_note:"v1.5 · Windows 10/11 · installer .exe",
     btn_download_android:"Descarcă pentru Android",
-    hero_note_android:"v1.5 · Android 7.0+ · APK · ~6 MB",
+    hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
     manifesto_h:"Un browser care nu te urmărește",
     manifesto_p:"BOBO este construit pe un principiu simplu: ce cauți și unde navighezi îți aparține. Fără istoric, fără cookies persistente, fără profilare și fără reclame. Sesiunea ta se șterge complet la închiderea browserului — de fiecare dată.",
     features_h:"Ce face BOBO diferit",
@@ -351,13 +418,21 @@ const I18N = {
     download_note:"Versiunea 1.5 · installer Windows · ~131 MB",
     plat_win_title:"Windows",
     plat_win_req:"Windows 10 sau 11 · Minim 4 GB RAM · 500 MB spațiu liber",
-    plat_and_req:"Android 7.0+ · Orice telefon sau tabletă Android · ~6 MB",
+    plat_and_req:"Android 7.0+ · Orice telefon sau tabletă Android · ~1.5 MB",
     btn_download_android:"Descarcă pentru Android",
-    android_note:"Versiunea 1.5 · APK direct · ~6 MB",
+    android_note:"Versiunea 1.5 · APK direct · ~1.5 MB",
     badge_beta:"BETA",
     req1:"Windows 10 sau 11",
     req2:"Minim 4 GB RAM",
     req3:"500 MB spațiu liber",
+    install_h:"Cum instalezi Bobo Browser?",
+    install_intro:"Instalarea durează mai puțin de un minut. Urmează pașii de mai jos.",
+    step1:"Descarcă fișierul <strong>bobo_browser_1.5.apk</strong> pe telefonul tău Android apăsând butonul verde de mai sus.",
+    step2:"Deschide fișierul descărcat din bara de notificări sau din aplicația <strong>Fișiere / Descărcări</strong>.",
+    step3:"Dacă apare mesajul <strong>\"Surse necunoscute\"</strong>, activează permisiunea:<span class=\"step-path\">Android 7–9: Setări → Securitate → Activează „Instalare din surse necunoscute\"\nAndroid 10+: Setări → Aplicații → (browser-ul din care ai descărcat) → Permite instalarea aplicațiilor necunoscute</span>",
+    step4:"Apasă <strong>„Instalează\"</strong> și așteaptă câteva secunde.",
+    step5:"Gata! Deschide <strong>Bobo Browser</strong> din lista de aplicații și bucură-te de navigare privată.",
+    safety_text:"🛡️ <strong>Notă de siguranță:</strong> Bobo Browser este o aplicație 100% sigură, dezvoltată de BoBo Soft. Nu conține viruși, reclame sau colectare de date. Dacă antivirusul telefonului afișează un avertisment la instalare, este o alertă generică pentru aplicații din afara Google Play Store — nu indică niciun pericol real.",
     footer_sub:"BROWSER PRIVAT EUROPEAN · FĂRĂ RECLAME · FĂRĂ TRACKING"
   },
   en:{
@@ -366,7 +441,7 @@ const I18N = {
     btn_download:"Download for Windows",
     hero_note:"v1.5 · Windows 10/11 · .exe installer",
     btn_download_android:"Download for Android",
-    hero_note_android:"v1.5 · Android 7.0+ · APK · ~6 MB",
+    hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
     manifesto_h:"A browser that does not track you",
     manifesto_p:"BOBO is built on a simple principle: what you search and where you browse belongs to you. No history, no persistent cookies, no profiling and no ads. Your session is wiped completely when you close the browser — every time.",
     features_h:"What makes BOBO different",
@@ -398,13 +473,21 @@ const I18N = {
     download_note:"Version 1.5 · Windows installer · ~131 MB",
     plat_win_title:"Windows",
     plat_win_req:"Windows 10 or 11 · At least 4 GB RAM · 500 MB free space",
-    plat_and_req:"Android 7.0+ · Any Android phone or tablet · ~6 MB",
+    plat_and_req:"Android 7.0+ · Any Android phone or tablet · ~1.5 MB",
     btn_download_android:"Download for Android",
-    android_note:"Version 1.5 · Direct APK · ~6 MB",
+    android_note:"Version 1.5 · Direct APK · ~1.5 MB",
     badge_beta:"BETA",
     req1:"Windows 10 or 11",
     req2:"At least 4 GB RAM",
     req3:"500 MB free space",
+    install_h:"How to install Bobo Browser?",
+    install_intro:"Installation takes less than one minute. Follow the steps below.",
+    step1:"Download <strong>bobo_browser_1.5.apk</strong> to your Android device by tapping the green button above.",
+    step2:"Open the downloaded file from the notification bar or from the <strong>Files / Downloads</strong> app.",
+    step3:"If you see the <strong>\"Unknown sources\"</strong> warning, enable the permission:<span class=\"step-path\">Android 7–9: Settings → Security → Enable \"Install from unknown sources\"\nAndroid 10+: Settings → Apps → (the browser you downloaded from) → Allow installing unknown apps</span>",
+    step4:"Tap <strong>\"Install\"</strong> and wait a few seconds.",
+    step5:"Done! Open <strong>Bobo Browser</strong> from your app list and enjoy private browsing.",
+    safety_text:"🛡️ <strong>Safety note:</strong> Bobo Browser is a 100% safe application developed by BoBo Soft. It contains no viruses, ads or data collection. If your phone's antivirus displays a warning during installation, it is a generic alert for apps installed outside the Google Play Store — it does not indicate any real danger.",
     footer_sub:"EUROPEAN PRIVATE BROWSER · NO ADS · NO TRACKING"
   }
 };
@@ -419,6 +502,10 @@ function setLang(lang){
   document.querySelectorAll("[data-i18n]").forEach(function(el){
     const key = el.getAttribute("data-i18n");
     if(dict[key] !== undefined) el.textContent = dict[key];
+  });
+  document.querySelectorAll("[data-i18n-html]").forEach(function(el){
+    const key = el.getAttribute("data-i18n-html");
+    if(dict[key] !== undefined) el.innerHTML = dict[key];
   });
   document.documentElement.lang = lang;
   document.title = TITLES[lang];
