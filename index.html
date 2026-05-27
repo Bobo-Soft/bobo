@@ -81,8 +81,20 @@
   }
   .ov-btn:hover{border-color:var(--gold);background:var(--bg2);box-shadow:0 0 12px rgba(184,147,90,.12);}
   .ov-btn.sel{border-color:#FFD700;background:var(--bg3);box-shadow:0 0 14px rgba(255,215,0,.18);}
-  .ov-btn .ob-flag{font-size:22px;flex-shrink:0;line-height:1;}
+  .ov-btn .ob-flag{flex-shrink:0;line-height:1;display:inline-flex;align-items:center;}
   .ov-btn .ob-name{font-size:13px;line-height:1.3;font-weight:500;}
+  .flag-img{
+    width:24px;height:18px;
+    border-radius:2px;
+    margin-right:8px;
+    vertical-align:middle;
+    object-fit:cover;
+    display:inline-block;
+    box-shadow:0 0 0 1px rgba(255,255,255,.08);
+  }
+  .dd-item .di-flag .flag-img,
+  .ov-btn .ob-flag .flag-img{margin-right:0;}
+  #lb-flag .flag-img{margin-right:0;width:20px;height:15px;}
   .ov-continue-bar{
     position:fixed;bottom:0;left:0;right:0;
     padding:14px 20px 22px;
@@ -141,7 +153,7 @@
   }
   .dd-item:hover{background:var(--bg3);color:var(--gold-light);}
   .dd-item.act{color:var(--gold-light);background:var(--bg3);}
-  .dd-item .di-flag{font-size:15px;flex-shrink:0;}
+  .dd-item .di-flag{flex-shrink:0;display:inline-flex;align-items:center;}
   .dd-item .di-name{flex:1;}
   .dd-item .di-code{font-size:10px;color:var(--muted);}
 
@@ -368,7 +380,7 @@
   <div class="nav-brand">BOBO <small>BROWSER</small></div>
   <div id="lang-sel">
     <button id="lang-btn" onclick="toggleDrop(event)">
-      <span id="lb-flag">🇷🇴</span>
+      <span id="lb-flag"><img class="flag-img" src="https://flagcdn.com/24x18/ro.png" srcset="https://flagcdn.com/48x36/ro.png 2x" width="24" height="18" alt="Română"></span>
       <span id="lb-code">RO</span>
       <span class="lb-arrow">▾</span>
     </button>
@@ -492,63 +504,70 @@
 /* ---------- Language metadata (groups + order) ---------- */
 var LANG_GROUPS = [
   {g:"Europa", langs:[
-    {c:"ro",f:"🇷🇴",n:"Română"},
-    {c:"en",f:"🇬🇧",n:"English"},
-    {c:"sq",f:"🇦🇱",n:"Shqip"},
-    {c:"hy",f:"🇦🇲",n:"Հայերեն"},
-    {c:"az",f:"🇦🇿",n:"Azərbaycan"},
-    {c:"be",f:"🇧🇾",n:"Беларуская"},
-    {c:"bs",f:"🇧🇦",n:"Bosanski"},
-    {c:"bg",f:"🇧🇬",n:"Български"},
-    {c:"ca",f:"🇪🇸",n:"Català"},
-    {c:"cs",f:"🇨🇿",n:"Čeština"},
-    {c:"hr",f:"🇭🇷",n:"Hrvatski"},
-    {c:"da",f:"🇩🇰",n:"Dansk"},
-    {c:"nl",f:"🇳🇱",n:"Nederlands"},
-    {c:"et",f:"🇪🇪",n:"Eesti"},
-    {c:"fi",f:"🇫🇮",n:"Suomi"},
-    {c:"fr",f:"🇫🇷",n:"Français"},
-    {c:"gl",f:"🇪🇸",n:"Galego"},
-    {c:"ka",f:"🇬🇪",n:"ქართული"},
-    {c:"de",f:"🇩🇪",n:"Deutsch"},
-    {c:"el",f:"🇬🇷",n:"Ελληνικά"},
-    {c:"hu",f:"🇭🇺",n:"Magyar"},
-    {c:"is",f:"🇮🇸",n:"Íslenska"},
-    {c:"ga",f:"🇮🇪",n:"Gaeilge"},
-    {c:"it",f:"🇮🇹",n:"Italiano"},
-    {c:"lv",f:"🇱🇻",n:"Latviešu"},
-    {c:"lt",f:"🇱🇹",n:"Lietuvių"},
-    {c:"mk",f:"🇲🇰",n:"Македонски"},
-    {c:"mt",f:"🇲🇹",n:"Malti"},
-    {c:"no",f:"🇳🇴",n:"Norsk"},
-    {c:"pl",f:"🇵🇱",n:"Polski"},
-    {c:"pt",f:"🇵🇹",n:"Português"},
-    {c:"sk",f:"🇸🇰",n:"Slovenčina"},
-    {c:"sl",f:"🇸🇮",n:"Slovenščina"},
-    {c:"es",f:"🇪🇸",n:"Español"},
-    {c:"sr",f:"🇷🇸",n:"Српски"},
-    {c:"sv",f:"🇸🇪",n:"Svenska"},
-    {c:"tr",f:"🇹🇷",n:"Türkçe"},
-    {c:"uk",f:"🇺🇦",n:"Українська"}
+    {c:"ro",f:"ro",n:"Română"},
+    {c:"en",f:"gb",n:"English"},
+    {c:"sq",f:"al",n:"Shqip"},
+    {c:"hy",f:"am",n:"Հայերեն"},
+    {c:"az",f:"az",n:"Azərbaycan"},
+    {c:"be",f:"by",n:"Беларуская"},
+    {c:"bs",f:"ba",n:"Bosanski"},
+    {c:"bg",f:"bg",n:"Български"},
+    {c:"ca",f:"es",n:"Català"},
+    {c:"cs",f:"cz",n:"Čeština"},
+    {c:"hr",f:"hr",n:"Hrvatski"},
+    {c:"da",f:"dk",n:"Dansk"},
+    {c:"nl",f:"nl",n:"Nederlands"},
+    {c:"et",f:"ee",n:"Eesti"},
+    {c:"fi",f:"fi",n:"Suomi"},
+    {c:"fr",f:"fr",n:"Français"},
+    {c:"gl",f:"es",n:"Galego"},
+    {c:"ka",f:"ge",n:"ქართული"},
+    {c:"de",f:"de",n:"Deutsch"},
+    {c:"el",f:"gr",n:"Ελληνικά"},
+    {c:"hu",f:"hu",n:"Magyar"},
+    {c:"is",f:"is",n:"Íslenska"},
+    {c:"ga",f:"ie",n:"Gaeilge"},
+    {c:"it",f:"it",n:"Italiano"},
+    {c:"lv",f:"lv",n:"Latviešu"},
+    {c:"lt",f:"lt",n:"Lietuvių"},
+    {c:"mk",f:"mk",n:"Македонски"},
+    {c:"mt",f:"mt",n:"Malti"},
+    {c:"no",f:"no",n:"Norsk"},
+    {c:"pl",f:"pl",n:"Polski"},
+    {c:"pt",f:"pt",n:"Português"},
+    {c:"sk",f:"sk",n:"Slovenčina"},
+    {c:"sl",f:"si",n:"Slovenščina"},
+    {c:"es",f:"es",n:"Español"},
+    {c:"sr",f:"rs",n:"Српски"},
+    {c:"sv",f:"se",n:"Svenska"},
+    {c:"tr",f:"tr",n:"Türkçe"},
+    {c:"uk",f:"ua",n:"Українська"}
   ]},
   {g:"Limbi regionale europene", langs:[
-    {c:"lb",f:"🇱🇺",n:"Lëtzebuergesch"},
-    {c:"scn",f:"🇮🇹",n:"Sicilianu"},
-    {c:"lad",f:"🏔️",n:"Ladin"},
-    {c:"aro",f:"🌟",n:"Armâneashti"},
-    {c:"yi",f:"✡️",n:"ייִדיש",rtl:true},
-    {c:"csb",f:"🇵🇱",n:"Kaszëbsczi"}
+    {c:"lb",f:"lu",n:"Lëtzebuergesch"},
+    {c:"scn",f:"it",n:"Sicilianu"},
+    {c:"lad",f:"it",n:"Ladin"},
+    {c:"aro",f:"ro",n:"Armâneashti"},
+    {c:"yi",f:"il",n:"ייִדיש",rtl:true},
+    {c:"csb",f:"pl",n:"Kaszëbsczi"}
   ]},
   {g:"Orient Mijlociu & Israel", langs:[
-    {c:"ar",f:"🇸🇦",n:"عربي",rtl:true},
-    {c:"he",f:"🇮🇱",n:"עברית",rtl:true}
+    {c:"ar",f:"sa",n:"عربي",rtl:true},
+    {c:"he",f:"il",n:"עברית",rtl:true}
   ]},
   {g:"India", langs:[
-    {c:"hi",f:"🇮🇳",n:"हिन्दी"},
-    {c:"bn",f:"🇮🇳",n:"বাংলা"},
-    {c:"ta",f:"🇮🇳",n:"தமிழ்"}
+    {c:"hi",f:"in",n:"हिन्दी"},
+    {c:"bn",f:"in",n:"বাংলা"},
+    {c:"ta",f:"in",n:"தமிழ்"}
   ]}
 ];
+
+/* ---------- Flag image helper ---------- */
+function flagImg(code, alt) {
+  return '<img class="flag-img" src="https://flagcdn.com/24x18/' + code +
+    '.png" srcset="https://flagcdn.com/48x36/' + code +
+    '.png 2x" width="24" height="18" alt="' + (alt || code).replace(/"/g,'&quot;') + '" loading="lazy">';
+}
 
 var RTL_SET = {ar:1,he:1,yi:1};
 
@@ -2980,7 +2999,7 @@ function applyLang(lang) {
   /* Update nav button */
   var meta = langMeta(lang);
   if (meta) {
-    document.getElementById("lb-flag").textContent = meta.f;
+    document.getElementById("lb-flag").innerHTML = flagImg(meta.f, meta.n);
     document.getElementById("lb-code").textContent = meta.c.toUpperCase();
   }
 
@@ -3005,7 +3024,7 @@ function buildOverlay() {
     for (var li = 0; li < g.langs.length; li++) {
       var l = g.langs[li];
       html += "<button class=\"ov-btn\" data-lang=\"" + l.c + "\" onclick=\"selectOvLang('" + l.c + "')\">" +
-        "<span class=\"ob-flag\">" + l.f + "</span>" +
+        "<span class=\"ob-flag\">" + flagImg(l.f, l.n) + "</span>" +
         "<span class=\"ob-name\">" + l.n + "</span>" +
         "</button>";
     }
@@ -3048,7 +3067,7 @@ function buildDropdown() {
     for (var li = 0; li < g.langs.length; li++) {
       var l = g.langs[li];
       html += "<div class=\"dd-item\" data-lang=\"" + l.c + "\" onclick=\"chooseLang('" + l.c + "')\">" +
-        "<span class=\"di-flag\">" + l.f + "</span>" +
+        "<span class=\"di-flag\">" + flagImg(l.f, l.n) + "</span>" +
         "<span class=\"di-name\">" + l.n + "</span>" +
         "<span class=\"di-code\">" + l.c.toUpperCase() + "</span>" +
         "</div>";
