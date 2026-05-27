@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ro">
+<html lang="ro" dir="ltr">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,6 +7,9 @@
 <meta name="description" content="BOBO Browser — browser privat european. Fără istoric, fără tracking, fără reclame. Gratuit și open-source." />
 <link rel="canonical" href="https://bobobrowser.eu/" />
 <link rel="icon" href="bobo_icon_64.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic&family=Noto+Sans+Hebrew&family=Noto+Sans+Devanagari&family=Noto+Sans+Bengali&family=Noto+Sans+Tamil&display=swap" rel="stylesheet">
 <style>
   :root{
     --gold:#b8935a;
@@ -31,7 +34,135 @@
   h1,h2,h3,.serif{font-family:Georgia,"Times New Roman",serif;}
   a{color:var(--gold-light);text-decoration:none;}
 
-  /* ---- Nav ---- */
+  /* ===== LANGUAGE OVERLAY (first visit) ===== */
+  #lang-overlay{
+    position:fixed;inset:0;z-index:9999;
+    background:var(--bg);
+    display:flex;flex-direction:column;align-items:center;
+    overflow-y:auto;
+    padding:48px 20px 120px;
+  }
+  .ov-logo{
+    width:88px;height:88px;border-radius:20px;
+    border:1px solid var(--line);
+    box-shadow:0 0 50px rgba(184,147,90,.2);
+    margin-bottom:24px;
+  }
+  #ov-title{
+    font-family:Georgia,serif;font-size:26px;
+    color:var(--gold-light);letter-spacing:2px;
+    margin-bottom:8px;text-align:center;
+  }
+  #ov-sub{
+    font-size:13px;color:var(--muted);
+    margin-bottom:36px;text-align:center;
+    letter-spacing:.5px;
+  }
+  .ov-grid-wrap{width:100%;max-width:620px;}
+  .ov-group-hdr{
+    font-size:10px;font-weight:700;letter-spacing:2px;
+    color:var(--muted);text-transform:uppercase;
+    padding:18px 0 8px;
+    border-top:1px solid var(--line);
+    margin-top:4px;
+  }
+  .ov-group-hdr:first-child{border-top:none;padding-top:0;}
+  .ov-lang-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:8px;
+    margin-bottom:4px;
+  }
+  .ov-btn{
+    display:flex;align-items:center;gap:10px;
+    background:rgba(20,18,16,.85);border:1px solid var(--line);
+    border-radius:10px;padding:12px 14px;
+    cursor:pointer;color:var(--text);
+    transition:.15s;text-align:left;width:100%;
+  }
+  .ov-btn:hover{border-color:var(--gold);background:var(--bg2);box-shadow:0 0 12px rgba(184,147,90,.12);}
+  .ov-btn.sel{border-color:#FFD700;background:var(--bg3);box-shadow:0 0 14px rgba(255,215,0,.18);}
+  .ov-btn .ob-flag{font-size:22px;flex-shrink:0;line-height:1;}
+  .ov-btn .ob-name{font-size:13px;line-height:1.3;font-weight:500;}
+  .ov-continue-bar{
+    position:fixed;bottom:0;left:0;right:0;
+    padding:14px 20px 22px;
+    background:linear-gradient(transparent,var(--bg) 38%);
+    display:flex;justify-content:center;
+    z-index:10000;pointer-events:none;
+  }
+  #ov-continue{
+    background:linear-gradient(135deg,var(--gold),var(--gold-light));
+    color:#0e0c0a;font-weight:700;font-size:16px;
+    padding:15px 0;border-radius:11px;
+    border:none;cursor:pointer;letter-spacing:.5px;
+    transition:.18s;width:100%;max-width:520px;
+    opacity:.35;pointer-events:none;
+  }
+  #ov-continue.ready{opacity:1;pointer-events:all;}
+  #ov-continue.ready:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(184,147,90,.35);}
+
+  /* ===== LANGUAGE DROPDOWN (nav) ===== */
+  #lang-sel{position:relative;}
+  #lang-btn{
+    display:flex;align-items:center;gap:6px;
+    background:transparent;border:1px solid var(--line);
+    border-radius:8px;padding:6px 12px;
+    color:var(--gold-light);font-size:13px;font-weight:600;
+    cursor:pointer;transition:.15s;letter-spacing:.5px;
+    white-space:nowrap;
+  }
+  #lang-btn:hover{border-color:var(--gold);}
+  #lang-btn .lb-arrow{font-size:9px;color:var(--muted);transition:transform .2s;margin-left:2px;}
+  #lang-btn.open .lb-arrow{transform:rotate(180deg);}
+  #lang-drop{
+    display:none;position:absolute;
+    top:calc(100% + 6px);
+    inset-inline-end:0;
+    min-width:220px;max-height:370px;overflow-y:auto;
+    background:var(--bg2);border:1px solid var(--line);
+    border-radius:12px;padding:6px;
+    z-index:300;
+    box-shadow:0 14px 44px rgba(0,0,0,.65);
+  }
+  #lang-drop.open{display:block;}
+  #lang-drop::-webkit-scrollbar{width:4px;}
+  #lang-drop::-webkit-scrollbar-track{background:transparent;}
+  #lang-drop::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px;}
+  .dd-group{
+    font-size:10px;font-weight:700;letter-spacing:2px;
+    color:var(--muted);text-transform:uppercase;
+    padding:8px 10px 4px;
+  }
+  .dd-item{
+    display:flex;align-items:center;gap:8px;
+    padding:8px 10px;border-radius:7px;
+    cursor:pointer;color:var(--text);font-size:13px;
+    transition:.1s;
+  }
+  .dd-item:hover{background:var(--bg3);color:var(--gold-light);}
+  .dd-item.act{color:var(--gold-light);background:var(--bg3);}
+  .dd-item .di-flag{font-size:15px;flex-shrink:0;}
+  .dd-item .di-name{flex:1;}
+  .dd-item .di-code{font-size:10px;color:var(--muted);}
+
+  /* ===== RTL support ===== */
+  [dir="rtl"] body{
+    font-family:"Noto Sans Arabic","Noto Sans Hebrew","Segoe UI",system-ui,sans-serif;
+  }
+  [dir="rtl"] #lang-drop{
+    inset-inline-end:0;
+  }
+  /* Font overrides for special scripts */
+  html[lang="ar"] body,html[lang="ar"] *:not(.ob-flag):not(.di-flag):not(.lb-flag){
+    font-family:"Noto Sans Arabic","Segoe UI",sans-serif!important;
+  }
+  html[lang="he"] body,html[lang="yi"] body{
+    font-family:"Noto Sans Hebrew","Segoe UI",sans-serif!important;
+  }
+  html[lang="hi"] body{font-family:"Noto Sans Devanagari","Segoe UI",sans-serif!important;}
+  html[lang="bn"] body{font-family:"Noto Sans Bengali","Segoe UI",sans-serif!important;}
+  html[lang="ta"] body{font-family:"Noto Sans Tamil","Segoe UI",sans-serif!important;}
+
+  /* ===== Nav ===== */
   nav{
     position:sticky;top:0;z-index:50;
     display:flex;align-items:center;justify-content:space-between;
@@ -45,20 +176,12 @@
     letter-spacing:3px;color:var(--gold-light);
   }
   .nav-brand small{font-size:11px;letter-spacing:2px;color:var(--muted);font-weight:normal;}
-  .lang-toggle{display:flex;gap:2px;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
-  .lang-toggle button{
-    background:transparent;border:none;cursor:pointer;
-    padding:6px 12px;color:var(--muted);font-size:12px;font-weight:600;
-    letter-spacing:1px;transition:.15s;
-  }
-  .lang-toggle button.active{background:var(--bg3);color:var(--gold-light);}
-  .lang-toggle button:hover{color:var(--gold-light);}
 
-  /* ---- Layout ---- */
+  /* ===== Layout ===== */
   section{padding:80px 32px;max-width:1080px;margin:0 auto;}
   .center{text-align:center;}
 
-  /* ---- Hero ---- */
+  /* ===== Hero ===== */
   .hero{padding-top:70px;padding-bottom:60px;}
   .hero img{
     width:150px;height:150px;border-radius:24px;
@@ -91,11 +214,10 @@
     background:linear-gradient(90deg,transparent,var(--gold),transparent);
   }
 
-  /* ---- Generic headings ---- */
   h2{font-size:34px;color:var(--gold-light);margin-bottom:14px;letter-spacing:1px;}
   .lead{font-size:17px;color:var(--text);max-width:720px;margin:0 auto;}
 
-  /* ---- Features ---- */
+  /* ===== Features ===== */
   .grid{
     display:grid;grid-template-columns:repeat(3,1fr);
     gap:20px;margin-top:46px;
@@ -103,14 +225,14 @@
   .card{
     background:var(--bg2);border:1px solid var(--line);
     border-radius:14px;padding:26px 24px;
-    transition:.18s;
+    transition:.18px;
   }
   .card:hover{border-color:var(--gold);transform:translateY(-3px);}
   .card .ico{font-size:26px;margin-bottom:12px;}
   .card h3{font-size:18px;color:var(--gold-light);margin-bottom:8px;}
   .card p{font-size:14px;color:var(--muted);line-height:1.6;}
 
-  /* ---- Privacy table ---- */
+  /* ===== Privacy table ===== */
   .privacy{background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
   table{
     width:100%;max-width:760px;margin:40px auto 0;
@@ -124,7 +246,7 @@
   .no{color:#9a6a5a;font-weight:600;}
   tbody td:first-child{color:var(--text);}
 
-  /* ---- Download ---- */
+  /* ===== Download ===== */
   .download{text-align:center;}
   .req{
     display:inline-flex;flex-wrap:wrap;gap:10px 26px;justify-content:center;
@@ -132,7 +254,7 @@
   }
   .req span::before{content:"•  ";color:var(--gold);}
 
-  /* ---- Platform cards ---- */
+  /* ===== Platform cards ===== */
   .platform-grid{
     display:grid;grid-template-columns:1fr 1fr;
     gap:24px;margin-top:36px;max-width:820px;margin-left:auto;margin-right:auto;
@@ -161,11 +283,8 @@
     color:#5abd7a;font-size:10px;font-weight:700;letter-spacing:1px;
     padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle;
   }
-  @media(max-width:620px){
-    .platform-grid{grid-template-columns:1fr;}
-  }
 
-  /* ---- Install Guide ---- */
+  /* ===== Install Guide ===== */
   .steps-list{
     max-width:680px;margin:36px auto 0;
     text-align:left;display:flex;flex-direction:column;gap:14px;
@@ -190,7 +309,7 @@
     font-size:12px;color:var(--muted);
     background:var(--bg3);border:1px solid var(--line);
     border-radius:6px;padding:8px 12px;margin-top:8px;
-    display:block;line-height:1.9;
+    display:block;line-height:1.9;white-space:pre-line;
   }
   .safety-box{
     max-width:680px;margin:28px auto 0;
@@ -201,7 +320,7 @@
   }
   .safety-box strong{color:#9ade9a;}
 
-  /* ---- Footer ---- */
+  /* ===== Footer ===== */
   footer{
     text-align:center;padding:46px 32px;
     border-top:1px solid var(--line);
@@ -212,6 +331,7 @@
   }
   .footer-sub{font-size:12px;color:var(--muted);margin-top:8px;letter-spacing:1px;}
 
+  /* ===== Responsive ===== */
   @media(max-width:780px){
     section{padding:56px 22px;}
     nav{padding:12px 20px;}
@@ -222,22 +342,42 @@
     th:nth-child(2),td:nth-child(2),
     th:nth-child(3),td:nth-child(3){width:auto;}
     th,td{padding:11px 10px;font-size:13px;}
+    .platform-grid{grid-template-columns:1fr;}
+  }
+  @media(max-width:480px){
+    .ov-lang-grid{grid-template-columns:1fr;}
   }
 </style>
 </head>
 <body>
 
+<!-- ===== LANGUAGE SELECTION OVERLAY (first visit only) ===== -->
+<div id="lang-overlay">
+  <img src="bobo_logo.png" alt="BOBO Browser" class="ov-logo" />
+  <div id="ov-title">Choose your language</div>
+  <div id="ov-sub">You can change this later</div>
+  <div class="ov-grid-wrap" id="ov-grid-wrap"><!-- populated by JS --></div>
+  <div class="ov-continue-bar">
+    <button id="ov-continue" onclick="confirmLang()">Continue</button>
+  </div>
+</div>
+
+<!-- ===== NAV ===== -->
 <nav>
   <div class="nav-brand">BOBO <small>BROWSER</small></div>
-  <div class="lang-toggle">
-    <button id="btn-ro" class="active" onclick="setLang('ro')">RO</button>
-    <button id="btn-en" onclick="setLang('en')">EN</button>
+  <div id="lang-sel">
+    <button id="lang-btn" onclick="toggleDrop(event)">
+      <span id="lb-flag">🇷🇴</span>
+      <span id="lb-code">RO</span>
+      <span class="lb-arrow">▾</span>
+    </button>
+    <div id="lang-drop"><!-- populated by JS --></div>
   </div>
 </nav>
 
 <!-- ===== HERO ===== -->
 <section class="hero center">
-  <img src="bobo_logo.png" alt="BOBO Art &amp; Design" />
+  <img src="bobo_logo.png" alt="BOBO Browser" />
   <h1>BOBO</h1>
   <p class="tagline" data-i18n="hero_tagline"></p>
   <p class="sub" data-i18n="hero_sub"></p>
@@ -265,30 +405,12 @@
 <section>
   <div class="center"><h2 data-i18n="features_h"></h2></div>
   <div class="grid">
-    <div class="card">
-      <div class="ico">🔒</div>
-      <h3 data-i18n="f1_t"></h3><p data-i18n="f1_d"></p>
-    </div>
-    <div class="card">
-      <div class="ico">🛡️</div>
-      <h3 data-i18n="f2_t"></h3><p data-i18n="f2_d"></p>
-    </div>
-    <div class="card">
-      <div class="ico">👁️</div>
-      <h3 data-i18n="f3_t"></h3><p data-i18n="f3_d"></p>
-    </div>
-    <div class="card">
-      <div class="ico">🔎</div>
-      <h3 data-i18n="f4_t"></h3><p data-i18n="f4_d"></p>
-    </div>
-    <div class="card">
-      <div class="ico">🌐</div>
-      <h3 data-i18n="f5_t"></h3><p data-i18n="f5_d"></p>
-    </div>
-    <div class="card">
-      <div class="ico">⌨️</div>
-      <h3 data-i18n="f6_t"></h3><p data-i18n="f6_d"></p>
-    </div>
+    <div class="card"><div class="ico">🔒</div><h3 data-i18n="f1_t"></h3><p data-i18n="f1_d"></p></div>
+    <div class="card"><div class="ico">🛡️</div><h3 data-i18n="f2_t"></h3><p data-i18n="f2_d"></p></div>
+    <div class="card"><div class="ico">👁️</div><h3 data-i18n="f3_t"></h3><p data-i18n="f3_d"></p></div>
+    <div class="card"><div class="ico">🔎</div><h3 data-i18n="f4_t"></h3><p data-i18n="f4_d"></p></div>
+    <div class="card"><div class="ico">🌐</div><h3 data-i18n="f5_t"></h3><p data-i18n="f5_d"></p></div>
+    <div class="card"><div class="ico">⌨️</div><h3 data-i18n="f6_t"></h3><p data-i18n="f6_d"></p></div>
   </div>
 </section>
 
@@ -320,9 +442,7 @@
 <section class="download">
   <h2 data-i18n="download_h"></h2>
   <p class="lead" data-i18n="download_p"></p>
-
   <div class="platform-grid">
-    <!-- Windows -->
     <div class="platform-card">
       <div class="plat-icon">🖥️</div>
       <h3 data-i18n="plat_win_title"></h3>
@@ -330,7 +450,6 @@
       <a class="btn" href="https://github.com/Bobo-Soft/bobo/releases/download/v1.5/BOBO_Browser_Setup.exe" download data-i18n="btn_download"></a>
       <span class="plat-note" data-i18n="download_note"></span>
     </div>
-    <!-- Android -->
     <div class="platform-card">
       <div class="plat-icon">📱</div>
       <h3>Android <span class="badge-beta" data-i18n="badge_beta"></span></h3>
@@ -347,26 +466,11 @@
   <h2 data-i18n="install_h"></h2>
   <p class="lead" data-i18n="install_intro"></p>
   <div class="steps-list">
-    <div class="step-item">
-      <div class="step-num">1</div>
-      <div class="step-text" data-i18n-html="step1"></div>
-    </div>
-    <div class="step-item">
-      <div class="step-num">2</div>
-      <div class="step-text" data-i18n-html="step2"></div>
-    </div>
-    <div class="step-item">
-      <div class="step-num">3</div>
-      <div class="step-text" data-i18n-html="step3"></div>
-    </div>
-    <div class="step-item">
-      <div class="step-num">4</div>
-      <div class="step-text" data-i18n-html="step4"></div>
-    </div>
-    <div class="step-item">
-      <div class="step-num">5</div>
-      <div class="step-text" data-i18n-html="step5"></div>
-    </div>
+    <div class="step-item"><div class="step-num">1</div><div class="step-text" data-i18n-html="step1"></div></div>
+    <div class="step-item"><div class="step-num">2</div><div class="step-text" data-i18n-html="step2"></div></div>
+    <div class="step-item"><div class="step-num">3</div><div class="step-text" data-i18n-html="step3"></div></div>
+    <div class="step-item"><div class="step-num">4</div><div class="step-text" data-i18n-html="step4"></div></div>
+    <div class="step-item"><div class="step-num">5</div><div class="step-text" data-i18n-html="step5"></div></div>
   </div>
   <div class="safety-box" data-i18n-html="safety_text"></div>
 </section>
@@ -379,141 +483,2632 @@
 </footer>
 
 <script>
-const I18N = {
-  ro:{
-    hero_tagline:"Navigarea pe internet este un drept privat, nu o oportunitate de monetizare.",
-    hero_sub:"BROWSER PRIVAT · WINDOWS & ANDROID · GRATUIT · OPEN-SOURCE",
-    btn_download:"Descarcă pentru Windows",
-    hero_note:"v1.5 · Windows 10/11 · installer .exe",
-    btn_download_android:"Descarcă pentru Android",
-    hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
-    manifesto_h:"Un browser care nu te urmărește",
-    manifesto_p:"BOBO este construit pe un principiu simplu: ce cauți și unde navighezi îți aparține. Fără istoric, fără cookies persistente, fără profilare și fără reclame. Sesiunea ta se șterge complet la închiderea browserului — de fiecare dată.",
-    features_h:"Ce face BOBO diferit",
-    f1_t:"Mod privat permanent",
-    f1_d:"Fără istoric și fără cookies persistente. La închidere, sesiunea dispare complet, fără urme pe disc.",
-    f2_t:"Blocare reclame integrată",
-    f2_d:"Peste 40 de domenii de publicitate și tracking blocate automat, cu un contor în timp real. Fără extensii.",
-    f3_t:"Fără tracking",
-    f3_d:"BOBO nu trimite telemetrie și nu construiește profiluri despre tine. Nimeni nu te urmărește.",
-    f4_t:"Căutare privată",
-    f4_d:"DuckDuckGo este motorul implicit — căutările tale nu sunt înregistrate. Poți alege și Brave, Google sau Bing.",
-    f5_t:"24 de limbi europene",
-    f5_d:"Interfață și ghiduri de instalare disponibile în 24 de limbi europene.",
-    f6_t:"Open-source",
-    f6_d:"Cod public și verificabil, scris în Python. Nimic ascuns, nimic în spatele cortinei.",
-    privacy_h:"Ce NU salvează BOBO",
-    privacy_intro:"Diferența dintre un browser privat și un browser obișnuit se vede în datele care NU sunt păstrate.",
-    th_feature:"Date",
-    th_others:"Browsere obișnuite",
-    r1:"Istoric de navigare",
-    r2:"Cookies după închidere",
-    r3:"Parole și formulare",
-    r4:"Profilare publicitară",
-    r5:"Telemetrie către producător",
-    v_no:"Nu",
-    v_yes:"Da",
-    download_h:"Descarcă acum",
-    download_p:"BOBO Browser este disponibil pentru Windows și Android. Alege platforma ta.",
-    download_note:"Versiunea 1.5 · installer Windows · ~131 MB",
-    plat_win_title:"Windows",
-    plat_win_req:"Windows 10 sau 11 · Minim 4 GB RAM · 500 MB spațiu liber",
-    plat_and_req:"Android 7.0+ · Orice telefon sau tabletă Android · ~1.5 MB",
-    btn_download_android:"Descarcă pentru Android",
-    android_note:"Versiunea 1.5 · APK direct · ~1.5 MB",
-    badge_beta:"BETA",
-    req1:"Windows 10 sau 11",
-    req2:"Minim 4 GB RAM",
-    req3:"500 MB spațiu liber",
-    install_h:"Cum instalezi Bobo Browser?",
-    install_intro:"Instalarea durează mai puțin de un minut. Urmează pașii de mai jos.",
-    step1:"Descarcă fișierul <strong>bobo_browser_1.5.apk</strong> pe telefonul tău Android apăsând butonul verde de mai sus.",
-    step2:"Deschide fișierul descărcat din bara de notificări sau din aplicația <strong>Fișiere / Descărcări</strong>.",
-    step3:"Dacă apare mesajul <strong>\"Surse necunoscute\"</strong>, activează permisiunea:<span class=\"step-path\">Android 7–9: Setări → Securitate → Activează „Instalare din surse necunoscute\"\nAndroid 10+: Setări → Aplicații → (browser-ul din care ai descărcat) → Permite instalarea aplicațiilor necunoscute</span>",
-    step4:"Apasă <strong>„Instalează\"</strong> și așteaptă câteva secunde.",
-    step5:"Gata! Deschide <strong>Bobo Browser</strong> din lista de aplicații și bucură-te de navigare privată.",
-    safety_text:"🛡️ <strong>Notă de siguranță:</strong> Bobo Browser este o aplicație 100% sigură, dezvoltată de BoBo Soft. Nu conține viruși, reclame sau colectare de date. Dacă antivirusul telefonului afișează un avertisment la instalare, este o alertă generică pentru aplicații din afara Google Play Store — nu indică niciun pericol real.",
-    footer_sub:"BROWSER PRIVAT EUROPEAN · FĂRĂ RECLAME · FĂRĂ TRACKING"
-  },
-  en:{
-    hero_tagline:"Browsing the web is a private right, not an opportunity to monetize users.",
-    hero_sub:"PRIVATE BROWSER · WINDOWS & ANDROID · FREE · OPEN-SOURCE",
-    btn_download:"Download for Windows",
-    hero_note:"v1.5 · Windows 10/11 · .exe installer",
-    btn_download_android:"Download for Android",
-    hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
-    manifesto_h:"A browser that does not track you",
-    manifesto_p:"BOBO is built on a simple principle: what you search and where you browse belongs to you. No history, no persistent cookies, no profiling and no ads. Your session is wiped completely when you close the browser — every time.",
-    features_h:"What makes BOBO different",
-    f1_t:"Permanent private mode",
-    f1_d:"No history and no persistent cookies. On close, the session disappears entirely, leaving no traces on disk.",
-    f2_t:"Built-in ad blocking",
-    f2_d:"Over 40 advertising and tracking domains blocked automatically, with a real-time counter. No extensions needed.",
-    f3_t:"No tracking",
-    f3_d:"BOBO sends no telemetry and builds no profile about you. Nobody is watching over your shoulder.",
-    f4_t:"Private search",
-    f4_d:"DuckDuckGo is the default engine — your searches are not logged. You can also pick Brave, Google or Bing.",
-    f5_t:"24 European languages",
-    f5_d:"Interface and installation guides available in 24 European languages.",
-    f6_t:"Open-source",
-    f6_d:"Public, verifiable code written in Python. Nothing hidden, nothing behind the curtain.",
-    privacy_h:"What BOBO does NOT store",
-    privacy_intro:"The difference between a private browser and an ordinary one shows in the data that is NOT kept.",
-    th_feature:"Data",
-    th_others:"Ordinary browsers",
-    r1:"Browsing history",
-    r2:"Cookies after closing",
-    r3:"Passwords and forms",
-    r4:"Advertising profiling",
-    r5:"Telemetry to the vendor",
-    v_no:"No",
-    v_yes:"Yes",
-    download_h:"Download now",
-    download_p:"BOBO Browser is available for Windows and Android. Choose your platform.",
-    download_note:"Version 1.5 · Windows installer · ~131 MB",
-    plat_win_title:"Windows",
-    plat_win_req:"Windows 10 or 11 · At least 4 GB RAM · 500 MB free space",
-    plat_and_req:"Android 7.0+ · Any Android phone or tablet · ~1.5 MB",
-    btn_download_android:"Download for Android",
-    android_note:"Version 1.5 · Direct APK · ~1.5 MB",
-    badge_beta:"BETA",
-    req1:"Windows 10 or 11",
-    req2:"At least 4 GB RAM",
-    req3:"500 MB free space",
-    install_h:"How to install Bobo Browser?",
-    install_intro:"Installation takes less than one minute. Follow the steps below.",
-    step1:"Download <strong>bobo_browser_1.5.apk</strong> to your Android device by tapping the green button above.",
-    step2:"Open the downloaded file from the notification bar or from the <strong>Files / Downloads</strong> app.",
-    step3:"If you see the <strong>\"Unknown sources\"</strong> warning, enable the permission:<span class=\"step-path\">Android 7–9: Settings → Security → Enable \"Install from unknown sources\"\nAndroid 10+: Settings → Apps → (the browser you downloaded from) → Allow installing unknown apps</span>",
-    step4:"Tap <strong>\"Install\"</strong> and wait a few seconds.",
-    step5:"Done! Open <strong>Bobo Browser</strong> from your app list and enjoy private browsing.",
-    safety_text:"🛡️ <strong>Safety note:</strong> Bobo Browser is a 100% safe application developed by BoBo Soft. It contains no viruses, ads or data collection. If your phone's antivirus displays a warning during installation, it is a generic alert for apps installed outside the Google Play Store — it does not indicate any real danger.",
-    footer_sub:"EUROPEAN PRIVATE BROWSER · NO ADS · NO TRACKING"
-  }
+/* ============================================================
+   BOBO BROWSER — Language System
+   49 languages · RTL support · First-visit overlay
+   ============================================================ */
+
+/* ---------- Language metadata (groups + order) ---------- */
+var LANG_GROUPS = [
+  {g:"Europa", langs:[
+    {c:"ro",f:"🇷🇴",n:"Română"},
+    {c:"en",f:"🇬🇧",n:"English"},
+    {c:"sq",f:"🇦🇱",n:"Shqip"},
+    {c:"hy",f:"🇦🇲",n:"Հայերեն"},
+    {c:"az",f:"🇦🇿",n:"Azərbaycan"},
+    {c:"be",f:"🇧🇾",n:"Беларуская"},
+    {c:"bs",f:"🇧🇦",n:"Bosanski"},
+    {c:"bg",f:"🇧🇬",n:"Български"},
+    {c:"ca",f:"🇪🇸",n:"Català"},
+    {c:"cs",f:"🇨🇿",n:"Čeština"},
+    {c:"hr",f:"🇭🇷",n:"Hrvatski"},
+    {c:"da",f:"🇩🇰",n:"Dansk"},
+    {c:"nl",f:"🇳🇱",n:"Nederlands"},
+    {c:"et",f:"🇪🇪",n:"Eesti"},
+    {c:"fi",f:"🇫🇮",n:"Suomi"},
+    {c:"fr",f:"🇫🇷",n:"Français"},
+    {c:"gl",f:"🇪🇸",n:"Galego"},
+    {c:"ka",f:"🇬🇪",n:"ქართული"},
+    {c:"de",f:"🇩🇪",n:"Deutsch"},
+    {c:"el",f:"🇬🇷",n:"Ελληνικά"},
+    {c:"hu",f:"🇭🇺",n:"Magyar"},
+    {c:"is",f:"🇮🇸",n:"Íslenska"},
+    {c:"ga",f:"🇮🇪",n:"Gaeilge"},
+    {c:"it",f:"🇮🇹",n:"Italiano"},
+    {c:"lv",f:"🇱🇻",n:"Latviešu"},
+    {c:"lt",f:"🇱🇹",n:"Lietuvių"},
+    {c:"mk",f:"🇲🇰",n:"Македонски"},
+    {c:"mt",f:"🇲🇹",n:"Malti"},
+    {c:"no",f:"🇳🇴",n:"Norsk"},
+    {c:"pl",f:"🇵🇱",n:"Polski"},
+    {c:"pt",f:"🇵🇹",n:"Português"},
+    {c:"sk",f:"🇸🇰",n:"Slovenčina"},
+    {c:"sl",f:"🇸🇮",n:"Slovenščina"},
+    {c:"es",f:"🇪🇸",n:"Español"},
+    {c:"sr",f:"🇷🇸",n:"Српски"},
+    {c:"sv",f:"🇸🇪",n:"Svenska"},
+    {c:"tr",f:"🇹🇷",n:"Türkçe"},
+    {c:"uk",f:"🇺🇦",n:"Українська"}
+  ]},
+  {g:"Limbi regionale europene", langs:[
+    {c:"lb",f:"🇱🇺",n:"Lëtzebuergesch"},
+    {c:"scn",f:"🇮🇹",n:"Sicilianu"},
+    {c:"lad",f:"🏔️",n:"Ladin"},
+    {c:"aro",f:"🌟",n:"Armâneashti"},
+    {c:"yi",f:"✡️",n:"ייִדיש",rtl:true},
+    {c:"csb",f:"🇵🇱",n:"Kaszëbsczi"}
+  ]},
+  {g:"Orient Mijlociu & Israel", langs:[
+    {c:"ar",f:"🇸🇦",n:"عربي",rtl:true},
+    {c:"he",f:"🇮🇱",n:"עברית",rtl:true}
+  ]},
+  {g:"India", langs:[
+    {c:"hi",f:"🇮🇳",n:"हिन्दी"},
+    {c:"bn",f:"🇮🇳",n:"বাংলা"},
+    {c:"ta",f:"🇮🇳",n:"தமிழ்"}
+  ]}
+];
+
+var RTL_SET = {ar:1,he:1,yi:1};
+
+/* ---------- Translations ---------- */
+var I18N = {};
+
+/* ===== ROMÂNĂ ===== */
+I18N.ro = {
+  page_title:"BOBO Browser — Navigare privată",
+  overlay_title:"Alege limba ta",
+  overlay_sub:"Poți schimba mai târziu",
+  overlay_cont:"Continuă",
+  hero_tagline:"Navigarea pe internet este un drept privat, nu o oportunitate de monetizare.",
+  hero_sub:"BROWSER PRIVAT · WINDOWS & ANDROID · GRATUIT · OPEN-SOURCE",
+  btn_download:"Descarcă pentru Windows",
+  hero_note:"v1.5 · Windows 10/11 · installer .exe",
+  btn_download_android:"Descarcă pentru Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"Un browser care nu te urmărește",
+  manifesto_p:"BOBO este construit pe un principiu simplu: ce cauți și unde navighezi îți aparține. Fără istoric, fără cookies persistente, fără profilare și fără reclame. Sesiunea ta se șterge complet la închiderea browserului — de fiecare dată.",
+  features_h:"Ce face BOBO diferit",
+  f1_t:"Mod privat permanent",
+  f1_d:"Fără istoric și fără cookies persistente. La închidere, sesiunea dispare complet, fără urme pe disc.",
+  f2_t:"Blocare reclame integrată",
+  f2_d:"Peste 40 de domenii de publicitate și tracking blocate automat, cu un contor în timp real. Fără extensii.",
+  f3_t:"Fără tracking",
+  f3_d:"BOBO nu trimite telemetrie și nu construiește profiluri despre tine. Nimeni nu te urmărește.",
+  f4_t:"Căutare privată",
+  f4_d:"DuckDuckGo este motorul implicit — căutările tale nu sunt înregistrate. Poți alege și Brave, Google sau Bing.",
+  f5_t:"49 de limbi",
+  f5_d:"Interfață disponibilă în 49 de limbi — europene, regionale și internaționale.",
+  f6_t:"Open-source",
+  f6_d:"Cod public și verificabil, scris în Python. Nimic ascuns, nimic în spatele cortinei.",
+  privacy_h:"Ce NU salvează BOBO",
+  privacy_intro:"Diferența dintre un browser privat și un browser obișnuit se vede în datele care NU sunt păstrate.",
+  th_feature:"Date",
+  th_others:"Browsere obișnuite",
+  r1:"Istoric de navigare",
+  r2:"Cookies după închidere",
+  r3:"Parole și formulare",
+  r4:"Profilare publicitară",
+  r5:"Telemetrie către producător",
+  v_no:"Nu",
+  v_yes:"Da",
+  download_h:"Descarcă acum",
+  download_p:"BOBO Browser este disponibil pentru Windows și Android. Alege platforma ta.",
+  download_note:"Versiunea 1.5 · installer Windows · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 sau 11 · Minim 4 GB RAM · 500 MB spațiu liber",
+  plat_and_req:"Android 7.0+ · Orice telefon sau tabletă Android · ~1.5 MB",
+  android_note:"Versiunea 1.5 · APK direct · ~1.5 MB",
+  badge_beta:"BETA",
+  install_h:"Cum instalezi Bobo Browser?",
+  install_intro:"Instalarea durează mai puțin de un minut. Urmează pașii de mai jos.",
+  step1:"Descarcă fișierul <strong>bobo_browser_1.5.apk</strong> pe telefonul tău Android apăsând butonul verde de mai sus.",
+  step2:"Deschide fișierul descărcat din bara de notificări sau din aplicația <strong>Fișiere / Descărcări</strong>.",
+  step3:"Dacă apare mesajul <strong>\"Surse necunoscute\"</strong>, activează permisiunea:<span class=\"step-path\">Android 7–9: Setări → Securitate → Activează „Instalare din surse necunoscute\"\nAndroid 10+: Setări → Aplicații → (browser-ul din care ai descărcat) → Permite instalarea aplicațiilor necunoscute</span>",
+  step4:"Apasă <strong>„Instalează\"</strong> și așteaptă câteva secunde.",
+  step5:"Gata! Deschide <strong>Bobo Browser</strong> din lista de aplicații și bucură-te de navigare privată.",
+  safety_text:"🛡️ <strong>Notă de siguranță:</strong> Bobo Browser este o aplicație 100% sigură, dezvoltată de BoBo Soft. Nu conține viruși, reclame sau colectare de date. Dacă antivirusul telefonului afișează un avertisment la instalare, este o alertă generică pentru aplicații din afara Google Play Store — nu indică niciun pericol real.",
+  footer_sub:"BROWSER PRIVAT EUROPEAN · FĂRĂ RECLAME · FĂRĂ TRACKING"
 };
 
-const TITLES = {
-  ro:"BOBO Browser — Navigare privată",
-  en:"BOBO Browser — Private browsing"
+/* ===== ENGLISH ===== */
+I18N.en = {
+  page_title:"BOBO Browser — Private browsing",
+  overlay_title:"Choose your language",
+  overlay_sub:"You can change this later",
+  overlay_cont:"Continue",
+  hero_tagline:"Browsing the web is a private right, not an opportunity to monetize users.",
+  hero_sub:"PRIVATE BROWSER · WINDOWS & ANDROID · FREE · OPEN-SOURCE",
+  btn_download:"Download for Windows",
+  hero_note:"v1.5 · Windows 10/11 · .exe installer",
+  btn_download_android:"Download for Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"A browser that does not track you",
+  manifesto_p:"BOBO is built on a simple principle: what you search and where you browse belongs to you. No history, no persistent cookies, no profiling and no ads. Your session is wiped completely when you close the browser — every time.",
+  features_h:"What makes BOBO different",
+  f1_t:"Permanent private mode",
+  f1_d:"No history and no persistent cookies. On close, the session disappears entirely, leaving no traces on disk.",
+  f2_t:"Built-in ad blocking",
+  f2_d:"Over 40 advertising and tracking domains blocked automatically, with a real-time counter. No extensions needed.",
+  f3_t:"No tracking",
+  f3_d:"BOBO sends no telemetry and builds no profile about you. Nobody is watching over your shoulder.",
+  f4_t:"Private search",
+  f4_d:"DuckDuckGo is the default engine — your searches are not logged. You can also pick Brave, Google or Bing.",
+  f5_t:"49 languages",
+  f5_d:"Interface available in 49 languages — European, regional and international.",
+  f6_t:"Open-source",
+  f6_d:"Public, verifiable code written in Python. Nothing hidden, nothing behind the curtain.",
+  privacy_h:"What BOBO does NOT store",
+  privacy_intro:"The difference between a private browser and an ordinary one shows in the data that is NOT kept.",
+  th_feature:"Data",
+  th_others:"Ordinary browsers",
+  r1:"Browsing history",
+  r2:"Cookies after closing",
+  r3:"Passwords and forms",
+  r4:"Advertising profiling",
+  r5:"Telemetry to the vendor",
+  v_no:"No",
+  v_yes:"Yes",
+  download_h:"Download now",
+  download_p:"BOBO Browser is available for Windows and Android. Choose your platform.",
+  download_note:"Version 1.5 · Windows installer · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 or 11 · At least 4 GB RAM · 500 MB free space",
+  plat_and_req:"Android 7.0+ · Any Android phone or tablet · ~1.5 MB",
+  android_note:"Version 1.5 · Direct APK · ~1.5 MB",
+  badge_beta:"BETA",
+  install_h:"How to install Bobo Browser?",
+  install_intro:"Installation takes less than one minute. Follow the steps below.",
+  step1:"Download <strong>bobo_browser_1.5.apk</strong> to your Android device by tapping the green button above.",
+  step2:"Open the downloaded file from the notification bar or from the <strong>Files / Downloads</strong> app.",
+  step3:"If you see the <strong>\"Unknown sources\"</strong> warning, enable the permission:<span class=\"step-path\">Android 7–9: Settings → Security → Enable \"Install from unknown sources\"\nAndroid 10+: Settings → Apps → (the browser you downloaded from) → Allow installing unknown apps</span>",
+  step4:"Tap <strong>\"Install\"</strong> and wait a few seconds.",
+  step5:"Done! Open <strong>Bobo Browser</strong> from your app list and enjoy private browsing.",
+  safety_text:"🛡️ <strong>Safety note:</strong> Bobo Browser is a 100% safe application developed by BoBo Soft. It contains no viruses, ads or data collection. If your phone's antivirus displays a warning during installation, it is a generic alert for apps installed outside the Google Play Store — it does not indicate any real danger.",
+  footer_sub:"EUROPEAN PRIVATE BROWSER · NO ADS · NO TRACKING"
 };
 
-function setLang(lang){
-  const dict = I18N[lang];
-  document.querySelectorAll("[data-i18n]").forEach(function(el){
-    const key = el.getAttribute("data-i18n");
-    if(dict[key] !== undefined) el.textContent = dict[key];
-  });
-  document.querySelectorAll("[data-i18n-html]").forEach(function(el){
-    const key = el.getAttribute("data-i18n-html");
-    if(dict[key] !== undefined) el.innerHTML = dict[key];
-  });
-  document.documentElement.lang = lang;
-  document.title = TITLES[lang];
-  document.getElementById("btn-ro").classList.toggle("active", lang==="ro");
-  document.getElementById("btn-en").classList.toggle("active", lang==="en");
+/* ===== DEUTSCH ===== */
+I18N.de = {
+  page_title:"BOBO Browser — Privates Surfen",
+  overlay_title:"Sprache wählen",
+  overlay_sub:"Du kannst dies später ändern",
+  overlay_cont:"Weiter",
+  hero_tagline:"Surfen im Internet ist ein Privatrecht, keine Gelegenheit zur Monetarisierung.",
+  hero_sub:"PRIVATER BROWSER · WINDOWS & ANDROID · KOSTENLOS · OPEN-SOURCE",
+  btn_download:"Für Windows herunterladen",
+  hero_note:"v1.5 · Windows 10/11 · .exe-Installer",
+  btn_download_android:"Für Android herunterladen",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Ein Browser, der dich nicht verfolgt",
+  manifesto_p:"BOBO basiert auf einem einfachen Prinzip: Was du suchst und wo du surfst, gehört dir. Kein Verlauf, keine dauerhaften Cookies, kein Profiling und keine Werbung. Deine Sitzung wird beim Schließen vollständig gelöscht — jedes Mal.",
+  features_h:"Was BOBO anders macht",
+  f1_t:"Dauerhafter Privatmodus",
+  f1_d:"Kein Verlauf, keine dauerhaften Cookies. Beim Schließen verschwindet die Sitzung vollständig, ohne Spuren auf der Festplatte.",
+  f2_t:"Integrierter Werbeblocker",
+  f2_d:"Über 40 Werbe- und Tracking-Domains werden automatisch gesperrt, mit Echtzeit-Zähler. Keine Erweiterungen nötig.",
+  f3_t:"Kein Tracking",
+  f3_d:"BOBO sendet keine Telemetrie und erstellt kein Profil über dich. Niemand beobachtet dich.",
+  f4_t:"Private Suche",
+  f4_d:"DuckDuckGo ist die Standard-Suchmaschine — deine Suchen werden nicht gespeichert. Du kannst auch Brave, Google oder Bing wählen.",
+  f5_t:"49 Sprachen",
+  f5_d:"Benutzeroberfläche in 49 Sprachen verfügbar — europäische, regionale und internationale.",
+  f6_t:"Open-source",
+  f6_d:"Öffentlicher, überprüfbarer Code in Python. Nichts versteckt, nichts hinter dem Vorhang.",
+  privacy_h:"Was BOBO NICHT speichert",
+  privacy_intro:"Der Unterschied zwischen einem privaten und einem normalen Browser zeigt sich in den Daten, die NICHT gespeichert werden.",
+  th_feature:"Daten",
+  th_others:"Normale Browser",
+  r1:"Browserverlauf",
+  r2:"Cookies nach dem Schließen",
+  r3:"Passwörter und Formulare",
+  r4:"Werbe-Profiling",
+  r5:"Telemetrie an den Anbieter",
+  v_no:"Nein",
+  v_yes:"Ja",
+  download_h:"Jetzt herunterladen",
+  download_p:"BOBO Browser ist für Windows und Android verfügbar. Wähle deine Plattform.",
+  download_note:"Version 1.5 · Windows-Installer · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 oder 11 · Mindestens 4 GB RAM · 500 MB freier Speicher",
+  plat_and_req:"Android 7.0+ · Jedes Android-Smartphone oder -Tablet · ~1,5 MB",
+  android_note:"Version 1.5 · Direktes APK · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"Wie installiere ich Bobo Browser?",
+  install_intro:"Die Installation dauert weniger als eine Minute. Folge den Schritten unten.",
+  step1:"Lade die Datei <strong>bobo_browser_1.5.apk</strong> auf dein Android-Gerät herunter, indem du auf den grünen Button oben tippst.",
+  step2:"Öffne die heruntergeladene Datei aus der Benachrichtigungsleiste oder aus der App <strong>Dateien / Downloads</strong>.",
+  step3:"Wenn die Meldung <strong>„Unbekannte Quellen\"</strong> erscheint, aktiviere die Berechtigung:<span class=\"step-path\">Android 7–9: Einstellungen → Sicherheit → „Installation aus unbekannten Quellen\" aktivieren\nAndroid 10+: Einstellungen → Apps → (Browser, mit dem du heruntergeladen hast) → Unbekannte Apps installieren erlauben</span>",
+  step4:"Tippe auf <strong>„Installieren\"</strong> und warte ein paar Sekunden.",
+  step5:"Fertig! Öffne <strong>Bobo Browser</strong> aus deiner App-Liste und genieße privates Surfen.",
+  safety_text:"🛡️ <strong>Sicherheitshinweis:</strong> Bobo Browser ist eine 100% sichere Anwendung, entwickelt von BoBo Soft. Sie enthält keine Viren, Werbung oder Datenerfassung. Wenn das Antivirenprogramm deines Telefons eine Warnung zeigt, ist das ein allgemeiner Hinweis für Apps außerhalb des Google Play Stores — kein echtes Sicherheitsrisiko.",
+  footer_sub:"EUROPÄISCHER PRIVATER BROWSER · KEINE WERBUNG · KEIN TRACKING"
+};
+
+/* ===== FRANÇAIS ===== */
+I18N.fr = {
+  page_title:"BOBO Browser — Navigation privée",
+  overlay_title:"Choisissez votre langue",
+  overlay_sub:"Vous pouvez changer cela plus tard",
+  overlay_cont:"Continuer",
+  hero_tagline:"La navigation sur Internet est un droit privé, pas une opportunité de monétisation.",
+  hero_sub:"NAVIGATEUR PRIVÉ · WINDOWS & ANDROID · GRATUIT · OPEN-SOURCE",
+  btn_download:"Télécharger pour Windows",
+  hero_note:"v1.5 · Windows 10/11 · installeur .exe",
+  btn_download_android:"Télécharger pour Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 Mo",
+  manifesto_h:"Un navigateur qui ne vous traque pas",
+  manifesto_p:"BOBO est construit sur un principe simple : ce que vous recherchez et où vous naviguez vous appartient. Pas d'historique, pas de cookies persistants, pas de profilage et pas de publicités. Votre session est entièrement effacée à la fermeture — à chaque fois.",
+  features_h:"Ce qui rend BOBO différent",
+  f1_t:"Mode privé permanent",
+  f1_d:"Pas d'historique ni de cookies persistants. À la fermeture, la session disparaît complètement, sans laisser de traces sur le disque.",
+  f2_t:"Blocage des publicités intégré",
+  f2_d:"Plus de 40 domaines publicitaires et de suivi bloqués automatiquement, avec un compteur en temps réel. Sans extensions.",
+  f3_t:"Aucun suivi",
+  f3_d:"BOBO n'envoie aucune télémétrie et ne crée aucun profil vous concernant. Personne ne vous surveille.",
+  f4_t:"Recherche privée",
+  f4_d:"DuckDuckGo est le moteur par défaut — vos recherches ne sont pas enregistrées. Vous pouvez aussi choisir Brave, Google ou Bing.",
+  f5_t:"49 langues",
+  f5_d:"Interface disponible en 49 langues — européennes, régionales et internationales.",
+  f6_t:"Open-source",
+  f6_d:"Code public et vérifiable, écrit en Python. Rien de caché, rien derrière le rideau.",
+  privacy_h:"Ce que BOBO ne stocke PAS",
+  privacy_intro:"La différence entre un navigateur privé et un ordinaire se voit dans les données qui ne sont PAS conservées.",
+  th_feature:"Données",
+  th_others:"Navigateurs ordinaires",
+  r1:"Historique de navigation",
+  r2:"Cookies après fermeture",
+  r3:"Mots de passe et formulaires",
+  r4:"Profilage publicitaire",
+  r5:"Télémétrie vers l'éditeur",
+  v_no:"Non",
+  v_yes:"Oui",
+  download_h:"Télécharger maintenant",
+  download_p:"BOBO Browser est disponible pour Windows et Android. Choisissez votre plateforme.",
+  download_note:"Version 1.5 · installeur Windows · ~131 Mo",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 ou 11 · Au moins 4 Go de RAM · 500 Mo d'espace libre",
+  plat_and_req:"Android 7.0+ · Tout téléphone ou tablette Android · ~1,5 Mo",
+  android_note:"Version 1.5 · APK direct · ~1,5 Mo",
+  badge_beta:"BÊTA",
+  install_h:"Comment installer Bobo Browser ?",
+  install_intro:"L'installation prend moins d'une minute. Suivez les étapes ci-dessous.",
+  step1:"Téléchargez le fichier <strong>bobo_browser_1.5.apk</strong> sur votre appareil Android en appuyant sur le bouton vert ci-dessus.",
+  step2:"Ouvrez le fichier téléchargé depuis la barre de notifications ou depuis l'application <strong>Fichiers / Téléchargements</strong>.",
+  step3:"Si le message <strong>« Sources inconnues »</strong> apparaît, activez l'autorisation :<span class=\"step-path\">Android 7–9 : Paramètres → Sécurité → Activer « Installation depuis des sources inconnues »\nAndroid 10+ : Paramètres → Applications → (le navigateur utilisé) → Autoriser l'installation d'applications inconnues</span>",
+  step4:"Appuyez sur <strong>« Installer »</strong> et attendez quelques secondes.",
+  step5:"Terminé ! Ouvrez <strong>Bobo Browser</strong> depuis votre liste d'applications et profitez de la navigation privée.",
+  safety_text:"🛡️ <strong>Note de sécurité :</strong> Bobo Browser est une application 100% sûre, développée par BoBo Soft. Elle ne contient ni virus, ni publicités, ni collecte de données. Si l'antivirus affiche un avertissement, c'est une alerte générique pour les apps hors Google Play Store — sans danger réel.",
+  footer_sub:"NAVIGATEUR PRIVÉ EUROPÉEN · SANS PUBLICITÉS · SANS TRAÇAGE"
+};
+
+/* ===== ESPAÑOL ===== */
+I18N.es = {
+  page_title:"BOBO Browser — Navegación privada",
+  overlay_title:"Elige tu idioma",
+  overlay_sub:"Puedes cambiarlo más tarde",
+  overlay_cont:"Continuar",
+  hero_tagline:"Navegar por Internet es un derecho privado, no una oportunidad de monetización.",
+  hero_sub:"NAVEGADOR PRIVADO · WINDOWS & ANDROID · GRATIS · OPEN-SOURCE",
+  btn_download:"Descargar para Windows",
+  hero_note:"v1.5 · Windows 10/11 · instalador .exe",
+  btn_download_android:"Descargar para Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Un navegador que no te rastrea",
+  manifesto_p:"BOBO está construido sobre un principio simple: lo que buscas y dónde navegas te pertenece. Sin historial, sin cookies persistentes, sin perfiles y sin anuncios. Tu sesión se borra completamente al cerrar el navegador — siempre.",
+  features_h:"Qué hace diferente a BOBO",
+  f1_t:"Modo privado permanente",
+  f1_d:"Sin historial ni cookies persistentes. Al cerrar, la sesión desaparece completamente, sin rastros en el disco.",
+  f2_t:"Bloqueador de anuncios integrado",
+  f2_d:"Más de 40 dominios de publicidad y rastreo bloqueados automáticamente, con contador en tiempo real. Sin extensiones.",
+  f3_t:"Sin rastreo",
+  f3_d:"BOBO no envía telemetría ni crea perfiles sobre ti. Nadie te está vigilando.",
+  f4_t:"Búsqueda privada",
+  f4_d:"DuckDuckGo es el motor predeterminado — tus búsquedas no se registran. También puedes elegir Brave, Google o Bing.",
+  f5_t:"49 idiomas",
+  f5_d:"Interfaz disponible en 49 idiomas — europeos, regionales e internacionales.",
+  f6_t:"Open-source",
+  f6_d:"Código público y verificable, escrito en Python. Nada oculto, nada entre bastidores.",
+  privacy_h:"Lo que BOBO NO guarda",
+  privacy_intro:"La diferencia entre un navegador privado y uno normal está en los datos que NO se conservan.",
+  th_feature:"Datos",
+  th_others:"Navegadores comunes",
+  r1:"Historial de navegación",
+  r2:"Cookies al cerrar",
+  r3:"Contraseñas y formularios",
+  r4:"Perfilado publicitario",
+  r5:"Telemetría al proveedor",
+  v_no:"No",
+  v_yes:"Sí",
+  download_h:"Descargar ahora",
+  download_p:"BOBO Browser está disponible para Windows y Android. Elige tu plataforma.",
+  download_note:"Versión 1.5 · instalador Windows · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 u 11 · Al menos 4 GB de RAM · 500 MB de espacio libre",
+  plat_and_req:"Android 7.0+ · Cualquier teléfono o tablet Android · ~1,5 MB",
+  android_note:"Versión 1.5 · APK directo · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"¿Cómo instalar Bobo Browser?",
+  install_intro:"La instalación tarda menos de un minuto. Sigue los pasos a continuación.",
+  step1:"Descarga el archivo <strong>bobo_browser_1.5.apk</strong> en tu dispositivo Android pulsando el botón verde de arriba.",
+  step2:"Abre el archivo descargado desde la barra de notificaciones o desde la aplicación <strong>Archivos / Descargas</strong>.",
+  step3:"Si aparece el mensaje <strong>«Fuentes desconocidas»</strong>, activa el permiso:<span class=\"step-path\">Android 7–9: Ajustes → Seguridad → Activar «Instalar desde fuentes desconocidas»\nAndroid 10+: Ajustes → Aplicaciones → (el navegador usado) → Permitir instalar aplicaciones desconocidas</span>",
+  step4:"Pulsa <strong>«Instalar»</strong> y espera unos segundos.",
+  step5:"¡Listo! Abre <strong>Bobo Browser</strong> desde tu lista de aplicaciones y disfruta de la navegación privada.",
+  safety_text:"🛡️ <strong>Nota de seguridad:</strong> Bobo Browser es una aplicación 100% segura, desarrollada por BoBo Soft. No contiene virus, anuncios ni recopilación de datos. Si el antivirus muestra una advertencia, es una alerta genérica para apps fuera de Google Play — sin peligro real.",
+  footer_sub:"NAVEGADOR PRIVADO EUROPEO · SIN ANUNCIOS · SIN RASTREO"
+};
+
+/* ===== ITALIANO ===== */
+I18N.it = {
+  page_title:"BOBO Browser — Navigazione privata",
+  overlay_title:"Scegli la tua lingua",
+  overlay_sub:"Puoi cambiarlo in seguito",
+  overlay_cont:"Continua",
+  hero_tagline:"Navigare in Internet è un diritto privato, non un'opportunità di monetizzazione.",
+  hero_sub:"BROWSER PRIVATO · WINDOWS & ANDROID · GRATUITO · OPEN-SOURCE",
+  btn_download:"Scarica per Windows",
+  hero_note:"v1.5 · Windows 10/11 · installer .exe",
+  btn_download_android:"Scarica per Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Un browser che non ti traccia",
+  manifesto_p:"BOBO è costruito su un principio semplice: ciò che cerchi e dove navighi ti appartiene. Nessuna cronologia, nessun cookie persistente, nessuna profilazione e nessuna pubblicità. La sessione viene cancellata completamente alla chiusura — ogni volta.",
+  features_h:"Cosa rende BOBO diverso",
+  f1_t:"Modalità privata permanente",
+  f1_d:"Nessuna cronologia né cookie persistenti. Alla chiusura, la sessione scompare completamente, senza tracce su disco.",
+  f2_t:"Blocco pubblicità integrato",
+  f2_d:"Oltre 40 domini di pubblicità e tracciamento bloccati automaticamente, con contatore in tempo reale. Nessuna estensione.",
+  f3_t:"Nessun tracciamento",
+  f3_d:"BOBO non invia telemetria né crea profili su di te. Nessuno ti sta osservando.",
+  f4_t:"Ricerca privata",
+  f4_d:"DuckDuckGo è il motore predefinito — le tue ricerche non vengono registrate. Puoi scegliere anche Brave, Google o Bing.",
+  f5_t:"49 lingue",
+  f5_d:"Interfaccia disponibile in 49 lingue — europee, regionali e internazionali.",
+  f6_t:"Open-source",
+  f6_d:"Codice pubblico e verificabile, scritto in Python. Niente di nascosto, niente dietro le quinte.",
+  privacy_h:"Cosa NON salva BOBO",
+  privacy_intro:"La differenza tra un browser privato e uno comune si vede nei dati che NON vengono conservati.",
+  th_feature:"Dati",
+  th_others:"Browser comuni",
+  r1:"Cronologia di navigazione",
+  r2:"Cookie dopo la chiusura",
+  r3:"Password e moduli",
+  r4:"Profilazione pubblicitaria",
+  r5:"Telemetria al produttore",
+  v_no:"No",
+  v_yes:"Sì",
+  download_h:"Scarica ora",
+  download_p:"BOBO Browser è disponibile per Windows e Android. Scegli la tua piattaforma.",
+  download_note:"Versione 1.5 · installer Windows · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 o 11 · Almeno 4 GB di RAM · 500 MB di spazio libero",
+  plat_and_req:"Android 7.0+ · Qualsiasi smartphone o tablet Android · ~1,5 MB",
+  android_note:"Versione 1.5 · APK diretto · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"Come installare Bobo Browser?",
+  install_intro:"L'installazione richiede meno di un minuto. Segui i passaggi seguenti.",
+  step1:"Scarica il file <strong>bobo_browser_1.5.apk</strong> sul tuo dispositivo Android premendo il pulsante verde sopra.",
+  step2:"Apri il file scaricato dalla barra delle notifiche o dall'app <strong>File / Download</strong>.",
+  step3:"Se compare il messaggio <strong>«Sorgenti sconosciute»</strong>, attiva il permesso:<span class=\"step-path\">Android 7–9: Impostazioni → Sicurezza → Attiva «Installa da sorgenti sconosciute»\nAndroid 10+: Impostazioni → App → (il browser usato) → Consenti installazione di app sconosciute</span>",
+  step4:"Tocca <strong>«Installa»</strong> e attendi qualche secondo.",
+  step5:"Fatto! Apri <strong>Bobo Browser</strong> dalla lista app e goditi la navigazione privata.",
+  safety_text:"🛡️ <strong>Nota di sicurezza:</strong> Bobo Browser è un'applicazione 100% sicura, sviluppata da BoBo Soft. Non contiene virus, pubblicità o raccolta dati. Se l'antivirus mostra un avviso, è un alert generico per app fuori dal Google Play Store — nessun pericolo reale.",
+  footer_sub:"BROWSER PRIVATO EUROPEO · SENZA PUBBLICITÀ · SENZA TRACCIAMENTO"
+};
+
+/* ===== PORTUGUÊS ===== */
+I18N.pt = {
+  page_title:"BOBO Browser — Navegação privada",
+  overlay_title:"Escolhe o teu idioma",
+  overlay_sub:"Podes mudar mais tarde",
+  overlay_cont:"Continuar",
+  hero_tagline:"Navegar na Internet é um direito privado, não uma oportunidade de monetização.",
+  hero_sub:"NAVEGADOR PRIVADO · WINDOWS & ANDROID · GRÁTIS · OPEN-SOURCE",
+  btn_download:"Baixar para Windows",
+  hero_note:"v1.5 · Windows 10/11 · instalador .exe",
+  btn_download_android:"Baixar para Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Um browser que não te rastreia",
+  manifesto_p:"BOBO é construído num princípio simples: o que pesquisas e onde navegas é teu. Sem histórico, sem cookies persistentes, sem perfis e sem anúncios. A sessão é apagada completamente ao fechar — sempre.",
+  features_h:"O que torna o BOBO diferente",
+  f1_t:"Modo privado permanente",
+  f1_d:"Sem histórico nem cookies persistentes. Ao fechar, a sessão desaparece completamente, sem rastros no disco.",
+  f2_t:"Bloqueador de anúncios integrado",
+  f2_d:"Mais de 40 domínios de publicidade e rastreio bloqueados automaticamente, com contador em tempo real. Sem extensões.",
+  f3_t:"Sem rastreio",
+  f3_d:"BOBO não envia telemetria nem cria perfis sobre ti. Ninguém te está a observar.",
+  f4_t:"Pesquisa privada",
+  f4_d:"DuckDuckGo é o motor padrão — as tuas pesquisas não são registadas. Podes também escolher Brave, Google ou Bing.",
+  f5_t:"49 idiomas",
+  f5_d:"Interface disponível em 49 idiomas — europeus, regionais e internacionais.",
+  f6_t:"Open-source",
+  f6_d:"Código público e verificável, escrito em Python. Nada escondido, nada por detrás da cortina.",
+  privacy_h:"O que o BOBO NÃO guarda",
+  privacy_intro:"A diferença entre um browser privado e um normal vê-se nos dados que NÃO são guardados.",
+  th_feature:"Dados",
+  th_others:"Browsers comuns",
+  r1:"Histórico de navegação",
+  r2:"Cookies após fechar",
+  r3:"Palavras-passe e formulários",
+  r4:"Perfis publicitários",
+  r5:"Telemetria para o fornecedor",
+  v_no:"Não",
+  v_yes:"Sim",
+  download_h:"Baixar agora",
+  download_p:"BOBO Browser está disponível para Windows e Android. Escolhe a tua plataforma.",
+  download_note:"Versão 1.5 · instalador Windows · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 ou 11 · Mínimo 4 GB de RAM · 500 MB de espaço livre",
+  plat_and_req:"Android 7.0+ · Qualquer telemóvel ou tablet Android · ~1,5 MB",
+  android_note:"Versão 1.5 · APK direto · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"Como instalar o Bobo Browser?",
+  install_intro:"A instalação demora menos de um minuto. Segue os passos abaixo.",
+  step1:"Descarrega o ficheiro <strong>bobo_browser_1.5.apk</strong> para o teu Android carregando no botão verde acima.",
+  step2:"Abre o ficheiro descarregado na barra de notificações ou na app <strong>Ficheiros / Downloads</strong>.",
+  step3:"Se aparecer a mensagem <strong>«Fontes desconhecidas»</strong>, ativa a permissão:<span class=\"step-path\">Android 7–9: Definições → Segurança → Ativar «Instalar de fontes desconhecidas»\nAndroid 10+: Definições → Aplicações → (o browser usado) → Permitir instalação de apps desconhecidas</span>",
+  step4:"Toca em <strong>«Instalar»</strong> e aguarda alguns segundos.",
+  step5:"Feito! Abre o <strong>Bobo Browser</strong> na lista de apps e desfruta da navegação privada.",
+  safety_text:"🛡️ <strong>Nota de segurança:</strong> O Bobo Browser é uma aplicação 100% segura, desenvolvida pela BoBo Soft. Não contém vírus, anúncios ou recolha de dados. Se o antivírus mostrar um aviso, é um alerta genérico para apps fora da Google Play Store — sem perigo real.",
+  footer_sub:"NAVEGADOR PRIVADO EUROPEU · SEM ANÚNCIOS · SEM RASTREIO"
+};
+
+/* ===== NEDERLANDS ===== */
+I18N.nl = {
+  page_title:"BOBO Browser — Privé browsen",
+  overlay_title:"Kies uw taal",
+  overlay_sub:"U kunt dit later wijzigen",
+  overlay_cont:"Doorgaan",
+  hero_tagline:"Internetten is een privérecht, geen kans om geld te verdienen aan gebruikers.",
+  hero_sub:"PRIVÉBROWSER · WINDOWS & ANDROID · GRATIS · OPEN-SOURCE",
+  btn_download:"Downloaden voor Windows",
+  hero_note:"v1.5 · Windows 10/11 · .exe-installatieprogramma",
+  btn_download_android:"Downloaden voor Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Een browser die u niet volgt",
+  manifesto_p:"BOBO is gebouwd op een eenvoudig principe: wat u zoekt en waar u surft is van u. Geen geschiedenis, geen persistente cookies, geen profilering en geen advertenties. Uw sessie wordt volledig gewist bij het sluiten — elke keer.",
+  features_h:"Wat maakt BOBO anders",
+  f1_t:"Permanente privémodus",
+  f1_d:"Geen geschiedenis en geen persistente cookies. Bij sluiten verdwijnt de sessie volledig, zonder sporen op schijf.",
+  f2_t:"Ingebouwde advertentieblokkering",
+  f2_d:"Meer dan 40 advertentie- en trackingdomeinen automatisch geblokkeerd, met realtime teller. Geen extensies nodig.",
+  f3_t:"Geen tracking",
+  f3_d:"BOBO stuurt geen telemetrie en maakt geen profiel over u. Niemand houdt u in de gaten.",
+  f4_t:"Privézoekopdracht",
+  f4_d:"DuckDuckGo is de standaard zoekmachine — uw zoekopdrachten worden niet geregistreerd. U kunt ook Brave, Google of Bing kiezen.",
+  f5_t:"49 talen",
+  f5_d:"Interface beschikbaar in 49 talen — Europees, regionaal en internationaal.",
+  f6_t:"Open-source",
+  f6_d:"Openbare, verifieerbare code geschreven in Python. Niets verborgen, niets achter het gordijn.",
+  privacy_h:"Wat BOBO NIET opslaat",
+  privacy_intro:"Het verschil tussen een privébrowser en een gewone browser zit in de gegevens die NIET worden bewaard.",
+  th_feature:"Gegevens",
+  th_others:"Gewone browsers",
+  r1:"Browsegeschiedenis",
+  r2:"Cookies na sluiten",
+  r3:"Wachtwoorden en formulieren",
+  r4:"Advertentieprofilering",
+  r5:"Telemetrie naar de leverancier",
+  v_no:"Nee",
+  v_yes:"Ja",
+  download_h:"Nu downloaden",
+  download_p:"BOBO Browser is beschikbaar voor Windows en Android. Kies uw platform.",
+  download_note:"Versie 1.5 · Windows-installatieprogramma · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 of 11 · Minimaal 4 GB RAM · 500 MB vrije ruimte",
+  plat_and_req:"Android 7.0+ · Elke Android-smartphone of -tablet · ~1,5 MB",
+  android_note:"Versie 1.5 · Directe APK · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"Hoe installeer ik Bobo Browser?",
+  install_intro:"De installatie duurt minder dan een minuut. Volg de onderstaande stappen.",
+  step1:"Download het bestand <strong>bobo_browser_1.5.apk</strong> naar uw Android-apparaat door op de groene knop te tikken.",
+  step2:"Open het gedownloade bestand vanuit de meldingsbalk of vanuit de app <strong>Bestanden / Downloads</strong>.",
+  step3:"Als het bericht <strong>«Onbekende bronnen»</strong> verschijnt, schakel de toestemming in:<span class=\"step-path\">Android 7–9: Instellingen → Beveiliging → «Installatie uit onbekende bronnen» inschakelen\nAndroid 10+: Instellingen → Apps → (gebruikte browser) → Installatie van onbekende apps toestaan</span>",
+  step4:"Tik op <strong>«Installeren»</strong> en wacht een paar seconden.",
+  step5:"Klaar! Open <strong>Bobo Browser</strong> vanuit uw app-lijst en geniet van privé browsen.",
+  safety_text:"🛡️ <strong>Veiligheidsnoot:</strong> Bobo Browser is een 100% veilige applicatie, ontwikkeld door BoBo Soft. Geen virussen, advertenties of gegevensverzameling. Een antiviruswaarschuwing bij installatie is een generiek bericht voor apps buiten de Google Play Store — geen echt gevaar.",
+  footer_sub:"EUROPESE PRIVÉBROWSER · GEEN ADVERTENTIES · GEEN TRACKING"
+};
+
+/* ===== POLSKI ===== */
+I18N.pl = {
+  page_title:"BOBO Browser — Prywatne przeglądanie",
+  overlay_title:"Wybierz język",
+  overlay_sub:"Możesz zmienić to później",
+  overlay_cont:"Kontynuuj",
+  hero_tagline:"Przeglądanie internetu to prawo do prywatności, nie okazja do zarabiania na użytkownikach.",
+  hero_sub:"PRYWATNA PRZEGLĄDARKA · WINDOWS & ANDROID · BEZPŁATNA · OPEN-SOURCE",
+  btn_download:"Pobierz dla Windows",
+  hero_note:"v1.5 · Windows 10/11 · instalator .exe",
+  btn_download_android:"Pobierz dla Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Przeglądarka, która Cię nie śledzi",
+  manifesto_p:"BOBO zbudowany jest na prostej zasadzie: to czego szukasz i gdzie przeglądasz, należy do Ciebie. Brak historii, trwałych plików cookie, profilowania i reklam. Sesja jest całkowicie usuwana przy zamknięciu — za każdym razem.",
+  features_h:"Co wyróżnia BOBO",
+  f1_t:"Stały tryb prywatny",
+  f1_d:"Brak historii i trwałych plików cookie. Po zamknięciu sesja znika całkowicie, bez śladów na dysku.",
+  f2_t:"Wbudowane blokowanie reklam",
+  f2_d:"Ponad 40 domen reklamowych i śledzących blokowanych automatycznie, z licznikiem w czasie rzeczywistym. Bez rozszerzeń.",
+  f3_t:"Brak śledzenia",
+  f3_d:"BOBO nie wysyła telemetrii i nie tworzy profili o Tobie. Nikt Cię nie obserwuje.",
+  f4_t:"Prywatne wyszukiwanie",
+  f4_d:"DuckDuckGo to domyślna wyszukiwarka — Twoje wyszukiwania nie są rejestrowane. Możesz też wybrać Brave, Google lub Bing.",
+  f5_t:"49 języków",
+  f5_d:"Interfejs dostępny w 49 językach — europejskich, regionalnych i międzynarodowych.",
+  f6_t:"Open-source",
+  f6_d:"Publiczny, weryfikowalny kod napisany w Pythonie. Nic ukrytego, nic za kurtyną.",
+  privacy_h:"Czego BOBO NIE zapisuje",
+  privacy_intro:"Różnica między prywatną przeglądarką a zwykłą widoczna jest w danych, które NIE są przechowywane.",
+  th_feature:"Dane",
+  th_others:"Zwykłe przeglądarki",
+  r1:"Historia przeglądania",
+  r2:"Pliki cookie po zamknięciu",
+  r3:"Hasła i formularze",
+  r4:"Profilowanie reklamowe",
+  r5:"Telemetria do producenta",
+  v_no:"Nie",
+  v_yes:"Tak",
+  download_h:"Pobierz teraz",
+  download_p:"BOBO Browser dostępny jest dla Windows i Android. Wybierz swoją platformę.",
+  download_note:"Wersja 1.5 · instalator Windows · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 lub 11 · Co najmniej 4 GB RAM · 500 MB wolnego miejsca",
+  plat_and_req:"Android 7.0+ · Dowolny telefon lub tablet z Androidem · ~1,5 MB",
+  android_note:"Wersja 1.5 · Bezpośredni APK · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"Jak zainstalować Bobo Browser?",
+  install_intro:"Instalacja zajmuje mniej niż minutę. Wykonaj poniższe kroki.",
+  step1:"Pobierz plik <strong>bobo_browser_1.5.apk</strong> na urządzenie Android, naciskając zielony przycisk powyżej.",
+  step2:"Otwórz pobrany plik z paska powiadomień lub z aplikacji <strong>Pliki / Pobrane</strong>.",
+  step3:"Jeśli pojawi się komunikat <strong>„Nieznane źródła\"</strong>, włącz uprawnienie:<span class=\"step-path\">Android 7–9: Ustawienia → Bezpieczeństwo → Włącz „Instaluj z nieznanych źródeł\"\nAndroid 10+: Ustawienia → Aplikacje → (przeglądarka) → Zezwól na instalowanie nieznanych aplikacji</span>",
+  step4:"Naciśnij <strong>„Zainstaluj\"</strong> i poczekaj kilka sekund.",
+  step5:"Gotowe! Otwórz <strong>Bobo Browser</strong> z listy aplikacji i ciesz się prywatnym przeglądaniem.",
+  safety_text:"🛡️ <strong>Uwaga dotycząca bezpieczeństwa:</strong> Bobo Browser to w 100% bezpieczna aplikacja BoBo Soft. Nie zawiera wirusów, reklam ani zbierania danych. Ostrzeżenie antywirusa to ogólny alert dla aplikacji spoza Google Play — bez realnego zagrożenia.",
+  footer_sub:"EUROPEJSKA PRYWATNA PRZEGLĄDARKA · BEZ REKLAM · BEZ ŚLEDZENIA"
+};
+
+/* ===== ČEŠTINA ===== */
+I18N.cs = {
+  page_title:"BOBO Browser — Soukromé prohlížení",
+  overlay_title:"Zvolte jazyk",
+  overlay_sub:"Můžete to kdykoli změnit",
+  overlay_cont:"Pokračovat",
+  hero_tagline:"Prohlížení internetu je soukromé právo, ne příležitost k monetizaci uživatelů.",
+  hero_sub:"SOUKROMÝ PROHLÍŽEČ · WINDOWS & ANDROID · ZDARMA · OPEN-SOURCE",
+  btn_download:"Stáhnout pro Windows",
+  hero_note:"v1.5 · Windows 10/11 · instalátor .exe",
+  btn_download_android:"Stáhnout pro Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Prohlížeč, který vás nesleduje",
+  manifesto_p:"BOBO je postaven na jednoduchém principu: co hledáte a kde prohlížíte, patří vám. Žádná historie, žádné trvalé cookies, žádné profilování ani reklamy. Vaše relace je při zavření prohlížeče zcela vymazána — pokaždé.",
+  features_h:"Co dělá BOBO jiným",
+  f1_t:"Trvalý soukromý režim",
+  f1_d:"Žádná historie ani trvalé cookies. Po zavření relace zmizí beze stopy z disku.",
+  f2_t:"Integrované blokování reklam",
+  f2_d:"Přes 40 reklamních a sledovacích domén blokováno automaticky, s čítačem v reálném čase. Bez rozšíření.",
+  f3_t:"Žádné sledování",
+  f3_d:"BOBO neodesílá telemetrii a nevytváří o vás profily. Nikdo vás nesleduje.",
+  f4_t:"Soukromé vyhledávání",
+  f4_d:"DuckDuckGo je výchozí vyhledávač — vaše dotazy nejsou zaznamenávány. Můžete zvolit i Brave, Google nebo Bing.",
+  f5_t:"49 jazyků",
+  f5_d:"Rozhraní dostupné v 49 jazycích — evropských, regionálních a mezinárodních.",
+  f6_t:"Open-source",
+  f6_d:"Veřejný, ověřitelný kód napsaný v Pythonu. Nic skrytého, nic za oponou.",
+  privacy_h:"Co BOBO NEUKLÁDÁ",
+  privacy_intro:"Rozdíl mezi soukromým a běžným prohlížečem spočívá v datech, která NEJSOU uchovávána.",
+  th_feature:"Data",
+  th_others:"Běžné prohlížeče",
+  r1:"Historie prohlížení",
+  r2:"Cookies po zavření",
+  r3:"Hesla a formuláře",
+  r4:"Reklamní profilování",
+  r5:"Telemetrie výrobci",
+  v_no:"Ne",
+  v_yes:"Ano",
+  download_h:"Stáhnout nyní",
+  download_p:"BOBO Browser je dostupný pro Windows a Android. Vyberte si platformu.",
+  download_note:"Verze 1.5 · instalátor Windows · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 nebo 11 · Alespoň 4 GB RAM · 500 MB volného místa",
+  plat_and_req:"Android 7.0+ · Jakýkoli telefon nebo tablet Android · ~1,5 MB",
+  android_note:"Verze 1.5 · Přímý APK · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"Jak nainstalovat Bobo Browser?",
+  install_intro:"Instalace trvá méně než minutu. Postupujte podle níže uvedených kroků.",
+  step1:"Stáhněte soubor <strong>bobo_browser_1.5.apk</strong> do svého zařízení Android klepnutím na zelené tlačítko výše.",
+  step2:"Otevřete stažený soubor z lišty oznámení nebo z aplikace <strong>Soubory / Stažené</strong>.",
+  step3:"Pokud se zobrazí zpráva <strong>„Neznámé zdroje\"</strong>, povolte oprávnění:<span class=\"step-path\">Android 7–9: Nastavení → Zabezpečení → Povolit „Instalace z neznámých zdrojů\"\nAndroid 10+: Nastavení → Aplikace → (použitý prohlížeč) → Povolit instalaci neznámých aplikací</span>",
+  step4:"Klepněte na <strong>„Instalovat\"</strong> a počkejte pár sekund.",
+  step5:"Hotovo! Otevřete <strong>Bobo Browser</strong> ze seznamu aplikací a užívejte si soukromé prohlížení.",
+  safety_text:"🛡️ <strong>Bezpečnostní poznámka:</strong> Bobo Browser je 100% bezpečná aplikace od BoBo Soft. Neobsahuje viry, reklamy ani sběr dat. Varování antiviru při instalaci je obecné upozornění pro aplikace mimo Google Play — žádné skutečné nebezpečí.",
+  footer_sub:"EVROPSKÝ SOUKROMÝ PROHLÍŽEČ · BEZ REKLAM · BEZ SLEDOVÁNÍ"
+};
+
+/* ===== SLOVENČINA ===== */
+I18N.sk = {
+  page_title:"BOBO Browser — Súkromné prehliadanie",
+  overlay_title:"Vyberte jazyk",
+  overlay_sub:"Môžete to zmeniť neskôr",
+  overlay_cont:"Pokračovať",
+  hero_tagline:"Prehliadanie internetu je súkromné právo, nie príležitosť na monetizáciu používateľov.",
+  hero_sub:"SÚKROMNÝ PREHLIADAČ · WINDOWS & ANDROID · ZADARMO · OPEN-SOURCE",
+  btn_download:"Stiahnuť pre Windows",
+  hero_note:"v1.5 · Windows 10/11 · inštalátor .exe",
+  btn_download_android:"Stiahnuť pre Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Prehliadač, ktorý vás nesleduje",
+  manifesto_p:"BOBO je postavený na jednoduchom princípe: čo hľadáte a kde prehliadate, patrí vám. Bez histórie, trvalých cookies, profilovania a reklám. Vaša relácia sa pri zatvorení prehliadača úplne vymaže — zakaždým.",
+  features_h:"Čo robí BOBO iným",
+  f1_t:"Trvalý súkromný režim",
+  f1_d:"Bez histórie a trvalých cookies. Po zatvorení relácia zmizne bez stopy z disku.",
+  f2_t:"Integrované blokovanie reklám",
+  f2_d:"Viac ako 40 reklamných a sledovacích domén blokovaných automaticky, s počítadlom v reálnom čase. Bez rozšírení.",
+  f3_t:"Žiadne sledovanie",
+  f3_d:"BOBO neodosiela telemetriu a nevytvára o vás profily. Nikto vás nesleduje.",
+  f4_t:"Súkromné vyhľadávanie",
+  f4_d:"DuckDuckGo je predvolený vyhľadávač — vaše dopyty nie sú zaznamenávané. Môžete zvoliť aj Brave, Google alebo Bing.",
+  f5_t:"49 jazykov",
+  f5_d:"Rozhranie dostupné v 49 jazykoch — európskych, regionálnych a medzinárodných.",
+  f6_t:"Open-source",
+  f6_d:"Verejný, overiteľný kód napísaný v Pythone. Nič skryté, nič za závesom.",
+  privacy_h:"Čo BOBO NEUKLADÁ",
+  privacy_intro:"Rozdiel medzi súkromným a bežným prehliadačom spočíva v dátach, ktoré NIE sú uchovávané.",
+  th_feature:"Dáta",
+  th_others:"Bežné prehliadače",
+  r1:"História prehliadania",
+  r2:"Cookies po zatvorení",
+  r3:"Heslá a formuláre",
+  r4:"Reklamné profilovanie",
+  r5:"Telemetria výrobcovi",
+  v_no:"Nie",
+  v_yes:"Áno",
+  download_h:"Stiahnuť teraz",
+  download_p:"BOBO Browser je dostupný pre Windows a Android. Vyberte si platformu.",
+  download_note:"Verzia 1.5 · inštalátor Windows · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 alebo 11 · Aspoň 4 GB RAM · 500 MB voľného miesta",
+  plat_and_req:"Android 7.0+ · Akýkoľvek telefón alebo tablet Android · ~1,5 MB",
+  android_note:"Verzia 1.5 · Priamy APK · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"Ako nainštalovať Bobo Browser?",
+  install_intro:"Inštalácia trvá menej ako minútu. Postupujte podľa krokov nižšie.",
+  step1:"Stiahnite súbor <strong>bobo_browser_1.5.apk</strong> do svojho zariadenia Android klepnutím na zelené tlačidlo vyššie.",
+  step2:"Otvorte stiahnutý súbor z lišty oznámení alebo z aplikácie <strong>Súbory / Stiahnuté</strong>.",
+  step3:"Ak sa zobrazí správa <strong>„Neznáme zdroje\"</strong>, povoľte oprávnenie:<span class=\"step-path\">Android 7–9: Nastavenia → Zabezpečenie → Povoliť „Inštalácia z neznámych zdrojov\"\nAndroid 10+: Nastavenia → Aplikácie → (použitý prehliadač) → Povoliť inštaláciu neznámych aplikácií</span>",
+  step4:"Klepnite na <strong>„Inštalovať\"</strong> a počkajte pár sekúnd.",
+  step5:"Hotovo! Otvorte <strong>Bobo Browser</strong> zo zoznamu aplikácií a užívajte si súkromné prehliadanie.",
+  safety_text:"🛡️ <strong>Bezpečnostná poznámka:</strong> Bobo Browser je 100% bezpečná aplikácia od BoBo Soft. Neobsahuje vírusy, reklamy ani zber dát. Varovanie antivírusu pri inštalácii je všeobecné upozornenie pre aplikácie mimo Google Play — žiadne skutočné nebezpečenstvo.",
+  footer_sub:"EURÓPSKY SÚKROMNÝ PREHLIADAČ · BEZ REKLÁM · BEZ SLEDOVANIA"
+};
+
+/* ===== MAGYAR ===== */
+I18N.hu = {
+  page_title:"BOBO Browser — Privát böngészés",
+  overlay_title:"Válassz nyelvet",
+  overlay_sub:"Ezt később is megváltoztathatod",
+  overlay_cont:"Tovább",
+  hero_tagline:"Az internetezés magánjog, nem lehetőség a felhasználók monetizálására.",
+  hero_sub:"PRIVÁT BÖNGÉSZŐ · WINDOWS & ANDROID · INGYENES · OPEN-SOURCE",
+  btn_download:"Letöltés Windows-ra",
+  hero_note:"v1.5 · Windows 10/11 · .exe telepítő",
+  btn_download_android:"Letöltés Android-ra",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Egy böngésző, amely nem követ téged",
+  manifesto_p:"A BOBO egy egyszerű elvre épül: amit keresel és ahol böngészel, az a tiéd. Nincs előzmény, nincs állandó süti, nincs profilalkotás és nincs hirdetés. A munkamenet teljesen törlődik a böngésző bezárásakor — minden alkalommal.",
+  features_h:"Mi teszi a BOBO-t más",
+  f1_t:"Állandó privát mód",
+  f1_d:"Nincs előzmény és nincs állandó süti. Bezáráskor a munkamenet nyomtalanul eltűnik a lemezről.",
+  f2_t:"Beépített hirdetésblokkoló",
+  f2_d:"Több mint 40 hirdetési és követési domain automatikusan blokkolva, valós idejű számlálóval. Bővítmény nélkül.",
+  f3_t:"Nincs követés",
+  f3_d:"A BOBO nem küld telemetriát és nem épít rólad profilt. Senki sem figyel téged.",
+  f4_t:"Privát keresés",
+  f4_d:"A DuckDuckGo az alapértelmezett kereső — kereséseid nem kerülnek naplózásra. Választhatsz Brave-t, Google-t vagy Binget is.",
+  f5_t:"49 nyelv",
+  f5_d:"A felület 49 nyelven érhető el — európai, regionális és nemzetközi.",
+  f6_t:"Open-source",
+  f6_d:"Nyilvános, ellenőrizhető Python-kód. Semmi sem rejtett, semmi a függöny mögött.",
+  privacy_h:"Mit NEM tárol a BOBO",
+  privacy_intro:"A privát és a hagyományos böngésző közötti különbség abban rejlik, hogy milyen adatokat NEM tárol.",
+  th_feature:"Adatok",
+  th_others:"Hagyományos böngészők",
+  r1:"Böngészési előzmény",
+  r2:"Sütik bezárás után",
+  r3:"Jelszavak és űrlapok",
+  r4:"Hirdetési profilalkotás",
+  r5:"Telemetria a gyártónak",
+  v_no:"Nem",
+  v_yes:"Igen",
+  download_h:"Letöltés most",
+  download_p:"A BOBO Browser Windows-ra és Androidra érhető el. Válaszd ki a platformodat.",
+  download_note:"1.5-ös verzió · Windows telepítő · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 vagy 11 · Legalább 4 GB RAM · 500 MB szabad hely",
+  plat_and_req:"Android 7.0+ · Bármilyen Android telefon vagy táblagép · ~1,5 MB",
+  android_note:"1.5-ös verzió · Közvetlen APK · ~1,5 MB",
+  badge_beta:"BÉTA",
+  install_h:"Hogyan telepítsem a Bobo Browsert?",
+  install_intro:"A telepítés kevesebb mint egy percet vesz igénybe. Kövesd az alábbi lépéseket.",
+  step1:"Töltsd le a <strong>bobo_browser_1.5.apk</strong> fájlt Android-eszközödre a fenti zöld gombra koppintva.",
+  step2:"Nyisd meg a letöltött fájlt az értesítési sávból vagy a <strong>Fájlok / Letöltések</strong> alkalmazásból.",
+  step3:"Ha megjelenik az <strong>„Ismeretlen források\"</strong> üzenet, engedélyezd az engedélyt:<span class=\"step-path\">Android 7–9: Beállítások → Biztonság → „Ismeretlen forrásból való telepítés\" engedélyezése\nAndroid 10+: Beállítások → Alkalmazások → (használt böngésző) → Ismeretlen alkalmazások telepítésének engedélyezése</span>",
+  step4:"Koppints a <strong>„Telepítés\"</strong> gombra és várj néhány másodpercet.",
+  step5:"Kész! Nyisd meg a <strong>Bobo Browser</strong>t az alkalmazások listájából és élvezd a privát böngészést.",
+  safety_text:"🛡️ <strong>Biztonsági megjegyzés:</strong> A Bobo Browser egy 100% biztonságos alkalmazás, amelyet a BoBo Soft fejlesztett. Nem tartalmaz vírusokat, hirdetéseket vagy adatgyűjtést. Ha a telefon víruskereső figyelmeztetést jelenít meg, az egy általános riasztás a Google Play Store-on kívüli alkalmazásokhoz — nem jelez valós veszélyt.",
+  footer_sub:"EURÓPAI PRIVÁT BÖNGÉSZŐ · HIRDETÉS NÉLKÜL · KÖVETÉS NÉLKÜL"
+};
+
+/* ===== SVENSKA ===== */
+I18N.sv = {
+  page_title:"BOBO Browser — Privat surfning",
+  overlay_title:"Välj ditt språk",
+  overlay_sub:"Du kan ändra detta senare",
+  overlay_cont:"Fortsätt",
+  hero_tagline:"Att surfa på internet är en privat rättighet, inte en möjlighet att tjäna pengar på användare.",
+  hero_sub:"PRIVAT WEBBLÄSARE · WINDOWS & ANDROID · GRATIS · OPEN-SOURCE",
+  btn_download:"Ladda ner för Windows",
+  hero_note:"v1.5 · Windows 10/11 · .exe-installationsprogram",
+  btn_download_android:"Ladda ner för Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"En webbläsare som inte spårar dig",
+  manifesto_p:"BOBO är byggt på en enkel princip: vad du söker och var du surfar tillhör dig. Ingen historik, inga bestående cookies, ingen profilering och inga annonser. Din session raderas fullständigt när du stänger webbläsaren — varje gång.",
+  features_h:"Vad gör BOBO annorlunda",
+  f1_t:"Permanent privat läge",
+  f1_d:"Ingen historik och inga bestående cookies. Vid stängning försvinner sessionen helt, utan spår på disken.",
+  f2_t:"Inbyggd annonsblockerare",
+  f2_d:"Över 40 annons- och spårningsdomäner blockeras automatiskt, med realtidsräknare. Inga tillägg behövs.",
+  f3_t:"Ingen spårning",
+  f3_d:"BOBO skickar ingen telemetri och bygger ingen profil om dig. Ingen tittar dig över axeln.",
+  f4_t:"Privat sökning",
+  f4_d:"DuckDuckGo är standardmotorn — dina sökningar loggas inte. Du kan också välja Brave, Google eller Bing.",
+  f5_t:"49 språk",
+  f5_d:"Gränssnitt tillgängligt på 49 språk — europeiska, regionala och internationella.",
+  f6_t:"Open-source",
+  f6_d:"Offentlig, verifierbar kod skriven i Python. Inget dolt, inget bakom ridån.",
+  privacy_h:"Vad BOBO INTE lagrar",
+  privacy_intro:"Skillnaden mellan en privat webbläsare och en vanlig syns i de data som INTE sparas.",
+  th_feature:"Data",
+  th_others:"Vanliga webbläsare",
+  r1:"Webbläsarhistorik",
+  r2:"Cookies efter stängning",
+  r3:"Lösenord och formulär",
+  r4:"Reklamprofilering",
+  r5:"Telemetri till leverantören",
+  v_no:"Nej",
+  v_yes:"Ja",
+  download_h:"Ladda ner nu",
+  download_p:"BOBO Browser finns för Windows och Android. Välj din plattform.",
+  download_note:"Version 1.5 · Windows-installationsprogram · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 eller 11 · Minst 4 GB RAM · 500 MB ledigt utrymme",
+  plat_and_req:"Android 7.0+ · Vilken Android-telefon eller surfplatta som helst · ~1,5 MB",
+  android_note:"Version 1.5 · Direkt APK · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"Hur installerar jag Bobo Browser?",
+  install_intro:"Installationen tar mindre än en minut. Följ stegen nedan.",
+  step1:"Ladda ner filen <strong>bobo_browser_1.5.apk</strong> till din Android-enhet genom att trycka på den gröna knappen ovan.",
+  step2:"Öppna den nedladdade filen från meddelandefältet eller från appen <strong>Filer / Nedladdningar</strong>.",
+  step3:"Om meddelandet <strong>«Okända källor»</strong> visas, aktivera behörigheten:<span class=\"step-path\">Android 7–9: Inställningar → Säkerhet → Aktivera «Installera från okända källor»\nAndroid 10+: Inställningar → Appar → (webbläsaren du använde) → Tillåt installation av okända appar</span>",
+  step4:"Tryck på <strong>«Installera»</strong> och vänta några sekunder.",
+  step5:"Klart! Öppna <strong>Bobo Browser</strong> från din applista och njut av privat surfning.",
+  safety_text:"🛡️ <strong>Säkerhetsnotis:</strong> Bobo Browser är en 100% säker applikation utvecklad av BoBo Soft. Den innehåller inga virus, annonser eller datainsamling. Om telefonens antivirus visar en varning är det en generisk varning för appar utanför Google Play — inget verkligt hot.",
+  footer_sub:"EUROPEISK PRIVAT WEBBLÄSARE · INGA ANNONSER · INGEN SPÅRNING"
+};
+
+/* ===== DANSK ===== */
+I18N.da = {
+  page_title:"BOBO Browser — Privat browsing",
+  overlay_title:"Vælg dit sprog",
+  overlay_sub:"Du kan ændre dette senere",
+  overlay_cont:"Fortsæt",
+  hero_tagline:"At surfe på internettet er en privat ret, ikke en mulighed for at tjene penge på brugere.",
+  hero_sub:"PRIVAT BROWSER · WINDOWS & ANDROID · GRATIS · OPEN-SOURCE",
+  btn_download:"Download til Windows",
+  hero_note:"v1.5 · Windows 10/11 · .exe-installationsprogram",
+  btn_download_android:"Download til Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"En browser der ikke sporer dig",
+  manifesto_p:"BOBO er bygget på et enkelt princip: hvad du søger og hvor du surfer tilhører dig. Ingen historik, ingen vedvarende cookies, ingen profilering og ingen annoncer. Din session slettes fuldstændigt, når du lukker browseren — hver gang.",
+  features_h:"Hvad gør BOBO anderledes",
+  f1_t:"Permanent privat tilstand",
+  f1_d:"Ingen historik og ingen vedvarende cookies. Ved lukning forsvinder sessionen helt, uden spor på disken.",
+  f2_t:"Indbygget annonceblokering",
+  f2_d:"Over 40 reklame- og sporingsdomæner blokeret automatisk, med realtidstæller. Ingen udvidelser nødvendige.",
+  f3_t:"Ingen sporing",
+  f3_d:"BOBO sender ingen telemetri og opretter ingen profil om dig. Ingen kigger dig over skulderen.",
+  f4_t:"Privat søgning",
+  f4_d:"DuckDuckGo er standardsøgemaskinen — dine søgninger logges ikke. Du kan også vælge Brave, Google eller Bing.",
+  f5_t:"49 sprog",
+  f5_d:"Grænseflade tilgængelig på 49 sprog — europæiske, regionale og internationale.",
+  f6_t:"Open-source",
+  f6_d:"Offentlig, verificerbar kode skrevet i Python. Intet skjult, intet bag gardinet.",
+  privacy_h:"Hvad BOBO IKKE gemmer",
+  privacy_intro:"Forskellen mellem en privat browser og en almindelig ses i de data, der IKKE opbevares.",
+  th_feature:"Data",
+  th_others:"Almindelige browsere",
+  r1:"Browserhistorik",
+  r2:"Cookies efter lukning",
+  r3:"Adgangskoder og formularer",
+  r4:"Reklameprofil",
+  r5:"Telemetri til leverandøren",
+  v_no:"Nej",
+  v_yes:"Ja",
+  download_h:"Download nu",
+  download_p:"BOBO Browser er tilgængelig til Windows og Android. Vælg din platform.",
+  download_note:"Version 1.5 · Windows-installationsprogram · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 eller 11 · Mindst 4 GB RAM · 500 MB ledig plads",
+  plat_and_req:"Android 7.0+ · Enhver Android-telefon eller tablet · ~1,5 MB",
+  android_note:"Version 1.5 · Direkte APK · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"Hvordan installerer jeg Bobo Browser?",
+  install_intro:"Installationen tager mindre end ét minut. Følg trinnene nedenfor.",
+  step1:"Download filen <strong>bobo_browser_1.5.apk</strong> til din Android-enhed ved at trykke på den grønne knap ovenfor.",
+  step2:"Åbn den downloadede fil fra meddelelseslinjen eller fra appen <strong>Filer / Downloads</strong>.",
+  step3:"Hvis meddelelsen <strong>«Ukendte kilder»</strong> vises, aktiver tilladelsen:<span class=\"step-path\">Android 7–9: Indstillinger → Sikkerhed → Aktivér «Installer fra ukendte kilder»\nAndroid 10+: Indstillinger → Apps → (browseren du brugte) → Tillad installation af ukendte apps</span>",
+  step4:"Tryk på <strong>«Installer»</strong> og vent et par sekunder.",
+  step5:"Færdig! Åbn <strong>Bobo Browser</strong> fra din appliste og nyd privat browsing.",
+  safety_text:"🛡️ <strong>Sikkerhedsnote:</strong> Bobo Browser er en 100% sikker applikation udviklet af BoBo Soft. Den indeholder ingen virus, annoncer eller dataindsamling. Hvis telefonens antivirus viser en advarsel, er det en generisk advarsel for apps udenfor Google Play — ingen reel fare.",
+  footer_sub:"EUROPÆISK PRIVAT BROWSER · INGEN ANNONCER · INGEN SPORING"
+};
+
+/* ===== NORSK ===== */
+I18N.no = {
+  page_title:"BOBO Browser — Privat nettlesing",
+  overlay_title:"Velg ditt språk",
+  overlay_sub:"Du kan endre dette senere",
+  overlay_cont:"Fortsett",
+  hero_tagline:"Å surfe på internett er en privat rettighet, ikke en mulighet for å tjene penger på brukere.",
+  hero_sub:"PRIVAT NETTLESER · WINDOWS & ANDROID · GRATIS · OPEN-SOURCE",
+  btn_download:"Last ned for Windows",
+  hero_note:"v1.5 · Windows 10/11 · .exe-installasjonsprogram",
+  btn_download_android:"Last ned for Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"En nettleser som ikke sporer deg",
+  manifesto_p:"BOBO er bygget på et enkelt prinsipp: hva du søker etter og hvor du surfer tilhører deg. Ingen historikk, ingen vedvarende informasjonskapsler, ingen profilering og ingen annonser. Økten din slettes fullstendig når du lukker nettleseren — hver gang.",
+  features_h:"Hva gjør BOBO annerledes",
+  f1_t:"Permanent privat modus",
+  f1_d:"Ingen historikk og ingen vedvarende informasjonskapsler. Ved lukking forsvinner økten helt, uten spor på disken.",
+  f2_t:"Innebygd annonseblokkering",
+  f2_d:"Over 40 annonse- og sporingsdomener blokkert automatisk, med sanntidsteller. Ingen utvidelser nødvendig.",
+  f3_t:"Ingen sporing",
+  f3_d:"BOBO sender ingen telemetri og bygger ingen profil om deg. Ingen ser deg over skulderen.",
+  f4_t:"Privat søk",
+  f4_d:"DuckDuckGo er standard søkemotor — søkene dine logges ikke. Du kan også velge Brave, Google eller Bing.",
+  f5_t:"49 språk",
+  f5_d:"Grensesnitt tilgjengelig på 49 språk — europeiske, regionale og internasjonale.",
+  f6_t:"Open-source",
+  f6_d:"Offentlig, verifiserbar kode skrevet i Python. Ingenting skjult, ingenting bak forhenget.",
+  privacy_h:"Hva BOBO IKKE lagrer",
+  privacy_intro:"Forskjellen mellom en privat nettleser og en vanlig vises i dataene som IKKE beholdes.",
+  th_feature:"Data",
+  th_others:"Vanlige nettlesere",
+  r1:"Nettleserhistorikk",
+  r2:"Informasjonskapsler etter lukking",
+  r3:"Passord og skjemaer",
+  r4:"Reklameprofil",
+  r5:"Telemetri til leverandøren",
+  v_no:"Nei",
+  v_yes:"Ja",
+  download_h:"Last ned nå",
+  download_p:"BOBO Browser er tilgjengelig for Windows og Android. Velg din plattform.",
+  download_note:"Versjon 1.5 · Windows-installasjonsprogram · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 eller 11 · Minst 4 GB RAM · 500 MB ledig plass",
+  plat_and_req:"Android 7.0+ · Enhver Android-telefon eller nettbrett · ~1,5 MB",
+  android_note:"Versjon 1.5 · Direkte APK · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"Hvordan installerer jeg Bobo Browser?",
+  install_intro:"Installasjonen tar mindre enn ett minutt. Følg trinnene nedenfor.",
+  step1:"Last ned filen <strong>bobo_browser_1.5.apk</strong> til Android-enheten din ved å trykke på den grønne knappen ovenfor.",
+  step2:"Åpne den nedlastede filen fra varselslinjen eller fra appen <strong>Filer / Nedlastinger</strong>.",
+  step3:"Hvis meldingen <strong>«Ukjente kilder»</strong> vises, aktiver tillatelsen:<span class=\"step-path\">Android 7–9: Innstillinger → Sikkerhet → Aktiver «Installer fra ukjente kilder»\nAndroid 10+: Innstillinger → Apper → (nettleseren du brukte) → Tillat installasjon av ukjente apper</span>",
+  step4:"Trykk på <strong>«Installer»</strong> og vent noen sekunder.",
+  step5:"Ferdig! Åpne <strong>Bobo Browser</strong> fra applisten og nyt privat nettlesing.",
+  safety_text:"🛡️ <strong>Sikkerhetsmerknad:</strong> Bobo Browser er en 100% sikker applikasjon utviklet av BoBo Soft. Den inneholder ingen virus, annonser eller datainnsamling. Hvis antiviruset viser en advarsel, er det et generisk varsel for apper utenfor Google Play — ingen reell fare.",
+  footer_sub:"EUROPEISK PRIVAT NETTLESER · INGEN ANNONSER · INGEN SPORING"
+};
+
+/* ===== SUOMI ===== */
+I18N.fi = {
+  page_title:"BOBO Browser — Yksityinen selaaminen",
+  overlay_title:"Valitse kielesi",
+  overlay_sub:"Voit muuttaa tämän myöhemmin",
+  overlay_cont:"Jatka",
+  hero_tagline:"Internetin selaaminen on yksityinen oikeus, ei mahdollisuus käyttäjien monetisointiin.",
+  hero_sub:"YKSITYINEN SELAIN · WINDOWS & ANDROID · ILMAINEN · OPEN-SOURCE",
+  btn_download:"Lataa Windowsille",
+  hero_note:"v1.5 · Windows 10/11 · .exe-asennusohjelma",
+  btn_download_android:"Lataa Androidille",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 Mt",
+  manifesto_h:"Selain, joka ei seuraa sinua",
+  manifesto_p:"BOBO on rakennettu yksinkertaiselle periaatteelle: mitä etsit ja missä selaat, kuuluu sinulle. Ei historiaa, ei pysyviä evästeitä, ei profilointia eikä mainoksia. Istuntosi poistetaan kokonaan selaimen sulkemisen yhteydessä — joka kerta.",
+  features_h:"Mikä tekee BOBO:sta erilaisen",
+  f1_t:"Pysyvä yksityistila",
+  f1_d:"Ei historiaa eikä pysyviä evästeitä. Sulkemisen yhteydessä istunto katoaa kokonaan, ilman jälkiä levyllä.",
+  f2_t:"Sisäänrakennettu mainosten esto",
+  f2_d:"Yli 40 mainos- ja seurantadomeenia estetty automaattisesti, reaaliaikaisella laskurilla. Ei laajennuksia tarvita.",
+  f3_t:"Ei seurantaa",
+  f3_d:"BOBO ei lähetä telemetriaa eikä luo sinusta profiilia. Kukaan ei tarkkaile sinua.",
+  f4_t:"Yksityinen haku",
+  f4_d:"DuckDuckGo on oletushakukone — hakujasi ei kirjata. Voit myös valita Braven, Googlen tai Bingin.",
+  f5_t:"49 kieltä",
+  f5_d:"Käyttöliittymä saatavilla 49 kielellä — eurooppalaisilla, alueellisilla ja kansainvälisillä.",
+  f6_t:"Open-source",
+  f6_d:"Julkinen, tarkistettavissa oleva Python-koodi. Ei mitään piilotettua, ei mitään verhon takana.",
+  privacy_h:"Mitä BOBO EI tallenna",
+  privacy_intro:"Ero yksityisen ja tavallisen selaimen välillä näkyy tiedoissa, joita EI säilytetä.",
+  th_feature:"Tiedot",
+  th_others:"Tavalliset selaimet",
+  r1:"Selaushistoria",
+  r2:"Evästeet sulkemisen jälkeen",
+  r3:"Salasanat ja lomakkeet",
+  r4:"Mainosprofil",
+  r5:"Telemetria toimittajalle",
+  v_no:"Ei",
+  v_yes:"Kyllä",
+  download_h:"Lataa nyt",
+  download_p:"BOBO Browser on saatavilla Windowsille ja Androidille. Valitse alustasi.",
+  download_note:"Versio 1.5 · Windows-asennusohjelma · ~131 Mt",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 tai 11 · Vähintään 4 Gt RAM · 500 Mt vapaata tilaa",
+  plat_and_req:"Android 7.0+ · Mikä tahansa Android-puhelin tai tabletti · ~1,5 Mt",
+  android_note:"Versio 1.5 · Suora APK · ~1,5 Mt",
+  badge_beta:"BETA",
+  install_h:"Kuinka asennan Bobo Browserin?",
+  install_intro:"Asennus kestää alle minuutin. Seuraa alla olevia vaiheita.",
+  step1:"Lataa tiedosto <strong>bobo_browser_1.5.apk</strong> Android-laitteeseesi napauttamalla yllä olevaa vihreää painiketta.",
+  step2:"Avaa ladattu tiedosto ilmoituspalkista tai <strong>Tiedostot / Lataukset</strong> -sovelluksesta.",
+  step3:"Jos näet viestin <strong>«Tuntemattomat lähteet»</strong>, ota käyttöön lupa:<span class=\"step-path\">Android 7–9: Asetukset → Suojaus → Ota käyttöön «Asenna tuntemattomista lähteistä»\nAndroid 10+: Asetukset → Sovellukset → (käyttämäsi selain) → Salli tuntemattomien sovellusten asentaminen</span>",
+  step4:"Napauta <strong>«Asenna»</strong> ja odota muutama sekunti.",
+  step5:"Valmis! Avaa <strong>Bobo Browser</strong> sovellusluettelostasi ja nauti yksityisestä selaamisesta.",
+  safety_text:"🛡️ <strong>Turvallisuushuomio:</strong> Bobo Browser on 100% turvallinen sovellus BoBo Softin kehittämänä. Se ei sisällä viruksia, mainoksia tai tiedonkeruuta. Jos puhelimen virustorjunta näyttää varoituksen, se on yleinen varoitus Google Play Storen ulkopuolisille sovelluksille — ei todellista vaaraa.",
+  footer_sub:"EUROOPPALAINEN YKSITYINEN SELAIN · EI MAINOKSIA · EI SEURANTAA"
+};
+
+/* ===== ΕΛΛΗΝΙΚΆ ===== */
+I18N.el = {
+  page_title:"BOBO Browser — Ιδιωτική περιήγηση",
+  overlay_title:"Επιλέξτε γλώσσα",
+  overlay_sub:"Μπορείτε να το αλλάξετε αργότερα",
+  overlay_cont:"Συνέχεια",
+  hero_tagline:"Η περιήγηση στο διαδίκτυο είναι ιδιωτικό δικαίωμα, όχι ευκαιρία εκμετάλλευσης χρηστών.",
+  hero_sub:"ΙΔΙΩΤΙΚΟΣ BROWSER · WINDOWS & ANDROID · ΔΩΡΕΑΝ · OPEN-SOURCE",
+  btn_download:"Λήψη για Windows",
+  hero_note:"v1.5 · Windows 10/11 · πρόγραμμα εγκατάστασης .exe",
+  btn_download_android:"Λήψη για Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Ένας browser που δεν σας παρακολουθεί",
+  manifesto_p:"Το BOBO είναι χτισμένο σε μια απλή αρχή: αυτό που αναζητάτε και πού περιηγείστε ανήκει σε εσάς. Χωρίς ιστορικό, χωρίς μόνιμα cookies, χωρίς προφίλ και χωρίς διαφημίσεις. Η συνεδρία σας διαγράφεται πλήρως κατά το κλείσιμο — κάθε φορά.",
+  features_h:"Τι κάνει το BOBO διαφορετικό",
+  f1_t:"Μόνιμη ιδιωτική λειτουργία",
+  f1_d:"Χωρίς ιστορικό και μόνιμα cookies. Κατά το κλείσιμο η συνεδρία εξαφανίζεται χωρίς ίχνη στο δίσκο.",
+  f2_t:"Ενσωματωμένος αποκλεισμός διαφημίσεων",
+  f2_d:"Πάνω από 40 τομείς διαφημίσεων και παρακολούθησης αποκλείονται αυτόματα, με μετρητή σε πραγματικό χρόνο.",
+  f3_t:"Χωρίς παρακολούθηση",
+  f3_d:"Το BOBO δεν στέλνει τηλεμετρία και δεν δημιουργεί προφίλ για εσάς. Κανείς δεν σας παρακολουθεί.",
+  f4_t:"Ιδιωτική αναζήτηση",
+  f4_d:"Το DuckDuckGo είναι η προεπιλεγμένη μηχανή — οι αναζητήσεις σας δεν καταγράφονται. Μπορείτε επίσης να επιλέξετε Brave, Google ή Bing.",
+  f5_t:"49 γλώσσες",
+  f5_d:"Διεπαφή διαθέσιμη σε 49 γλώσσες — ευρωπαϊκές, περιφερειακές και διεθνείς.",
+  f6_t:"Open-source",
+  f6_d:"Δημόσιος, επαληθεύσιμος κώδικας γραμμένος σε Python. Τίποτα κρυφό, τίποτα πίσω από την κουρτίνα.",
+  privacy_h:"Τι ΔΕΝ αποθηκεύει το BOBO",
+  privacy_intro:"Η διαφορά μεταξύ ιδιωτικού και συνηθισμένου browser φαίνεται στα δεδομένα που ΔΕΝ διατηρούνται.",
+  th_feature:"Δεδομένα",
+  th_others:"Συνηθισμένοι browsers",
+  r1:"Ιστορικό περιήγησης",
+  r2:"Cookies μετά το κλείσιμο",
+  r3:"Κωδικοί και φόρμες",
+  r4:"Διαφημιστική προφιλοποίηση",
+  r5:"Τηλεμετρία στον προμηθευτή",
+  v_no:"Όχι",
+  v_yes:"Ναι",
+  download_h:"Λήψη τώρα",
+  download_p:"Το BOBO Browser είναι διαθέσιμο για Windows και Android. Επιλέξτε την πλατφόρμα σας.",
+  download_note:"Έκδοση 1.5 · εγκατάσταση Windows · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 ή 11 · Τουλάχιστον 4 GB RAM · 500 MB ελεύθερος χώρος",
+  plat_and_req:"Android 7.0+ · Οποιοδήποτε Android τηλέφωνο ή tablet · ~1,5 MB",
+  android_note:"Έκδοση 1.5 · Άμεσο APK · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"Πώς να εγκαταστήσω το Bobo Browser;",
+  install_intro:"Η εγκατάσταση διαρκεί λιγότερο από ένα λεπτό. Ακολουθήστε τα παρακάτω βήματα.",
+  step1:"Κατεβάστε το αρχείο <strong>bobo_browser_1.5.apk</strong> στη συσκευή Android σας πατώντας το πράσινο κουμπί παραπάνω.",
+  step2:"Ανοίξτε το ληφθέν αρχείο από τη γραμμή ειδοποιήσεων ή από την εφαρμογή <strong>Αρχεία / Λήψεις</strong>.",
+  step3:"Αν εμφανιστεί το μήνυμα <strong>«Άγνωστες πηγές»</strong>, ενεργοποιήστε την άδεια:<span class=\"step-path\">Android 7–9: Ρυθμίσεις → Ασφάλεια → Ενεργοποίηση «Εγκατάσταση από άγνωστες πηγές»\nAndroid 10+: Ρυθμίσεις → Εφαρμογές → (browser που χρησιμοποιήσατε) → Να επιτρέπεται εγκατάσταση άγνωστων εφαρμογών</span>",
+  step4:"Πατήστε <strong>«Εγκατάσταση»</strong> και περιμένετε μερικά δευτερόλεπτα.",
+  step5:"Έτοιμο! Ανοίξτε το <strong>Bobo Browser</strong> από τη λίστα εφαρμογών και απολαύστε ιδιωτική περιήγηση.",
+  safety_text:"🛡️ <strong>Σημείωση ασφαλείας:</strong> Το Bobo Browser είναι μια 100% ασφαλής εφαρμογή που αναπτύχθηκε από τη BoBo Soft. Δεν περιέχει ιούς, διαφημίσεις ή συλλογή δεδομένων. Αν το antivirus του τηλεφώνου εμφανίσει προειδοποίηση, είναι γενική ειδοποίηση για εφαρμογές εκτός Google Play — χωρίς πραγματικό κίνδυνο.",
+  footer_sub:"ΕΥΡΩΠΑΪΚΟΣ ΙΔΙΩΤΙΚΟΣ BROWSER · ΧΩΡΙΣ ΔΙΑΦΗΜΙΣΕΙΣ · ΧΩΡΙΣ ΠΑΡΑΚΟΛΟΥΘΗΣΗ"
+};
+
+/* ===== TÜRKÇE ===== */
+I18N.tr = {
+  page_title:"BOBO Browser — Gizli gezinme",
+  overlay_title:"Dilinizi seçin",
+  overlay_sub:"Bunu daha sonra değiştirebilirsiniz",
+  overlay_cont:"Devam",
+  hero_tagline:"İnternette gezinmek özel bir haktır, kullanıcılardan para kazanma fırsatı değil.",
+  hero_sub:"GİZLİ TARAYICI · WINDOWS & ANDROID · ÜCRETSİZ · OPEN-SOURCE",
+  btn_download:"Windows için indir",
+  hero_note:"v1.5 · Windows 10/11 · .exe yükleyici",
+  btn_download_android:"Android için indir",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Sizi takip etmeyen bir tarayıcı",
+  manifesto_p:"BOBO basit bir ilke üzerine inşa edilmiştir: aradıklarınız ve nerede gezindiğiniz size aittir. Geçmiş yok, kalıcı çerez yok, profil oluşturma yok ve reklam yok. Oturumunuz tarayıcıyı kapattığınızda tamamen siliniyor — her seferinde.",
+  features_h:"BOBO'yu farklı kılan nedir",
+  f1_t:"Kalıcı gizli mod",
+  f1_d:"Geçmiş ve kalıcı çerez yok. Kapanışta oturum tamamen siliniyor, diskte iz bırakmıyor.",
+  f2_t:"Yerleşik reklam engelleme",
+  f2_d:"40'tan fazla reklam ve izleme etki alanı otomatik olarak engellendi, gerçek zamanlı sayaçla. Eklenti gerekmez.",
+  f3_t:"İzleme yok",
+  f3_d:"BOBO telemetri göndermez ve hakkınızda profil oluşturmaz. Kimse sizi izlemiyor.",
+  f4_t:"Özel arama",
+  f4_d:"DuckDuckGo varsayılan motorur — aramalarınız kaydedilmez. Brave, Google veya Bing de seçebilirsiniz.",
+  f5_t:"49 dil",
+  f5_d:"Arayüz 49 dilde mevcuttur — Avrupa, bölgesel ve uluslararası.",
+  f6_t:"Open-source",
+  f6_d:"Python ile yazılmış, kamuya açık ve doğrulanabilir kod. Hiçbir şey gizli, perde arkasında hiçbir şey yok.",
+  privacy_h:"BOBO'nun SAKLAMAMADIĞI şeyler",
+  privacy_intro:"Gizli tarayıcı ile sıradan tarayıcı arasındaki fark, SAKLANMAYAN verilerde görülür.",
+  th_feature:"Veri",
+  th_others:"Sıradan tarayıcılar",
+  r1:"Gezinme geçmişi",
+  r2:"Kapanış sonrası çerezler",
+  r3:"Şifreler ve formlar",
+  r4:"Reklam profili oluşturma",
+  r5:"Satıcıya telemetri",
+  v_no:"Hayır",
+  v_yes:"Evet",
+  download_h:"Şimdi indir",
+  download_p:"BOBO Browser Windows ve Android için mevcuttur. Platformunuzu seçin.",
+  download_note:"Sürüm 1.5 · Windows yükleyici · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 veya 11 · En az 4 GB RAM · 500 MB boş alan",
+  plat_and_req:"Android 7.0+ · Herhangi bir Android telefon veya tablet · ~1,5 MB",
+  android_note:"Sürüm 1.5 · Doğrudan APK · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"Bobo Browser nasıl kurulur?",
+  install_intro:"Kurulum bir dakikadan az sürer. Aşağıdaki adımları izleyin.",
+  step1:"Yukarıdaki yeşil düğmeye dokunarak <strong>bobo_browser_1.5.apk</strong> dosyasını Android cihazınıza indirin.",
+  step2:"İndirilen dosyayı bildirim çubuğundan veya <strong>Dosyalar / İndirilenler</strong> uygulamasından açın.",
+  step3:"<strong>«Bilinmeyen kaynaklar»</strong> uyarısı görünürse izni etkinleştirin:<span class=\"step-path\">Android 7–9: Ayarlar → Güvenlik → «Bilinmeyen kaynaklardan yüklemeye izin ver»i etkinleştirin\nAndroid 10+: Ayarlar → Uygulamalar → (kullandığınız tarayıcı) → Bilinmeyen uygulamaları yüklemeye izin ver</span>",
+  step4:"<strong>«Yükle»</strong> düğmesine dokunun ve birkaç saniye bekleyin.",
+  step5:"Bitti! <strong>Bobo Browser</strong>'ı uygulama listesinden açın ve gizli gezintinin tadını çıkarın.",
+  safety_text:"🛡️ <strong>Güvenlik notu:</strong> Bobo Browser, BoBo Soft tarafından geliştirilen 100% güvenli bir uygulamadır. Virüs, reklam veya veri toplama içermez. Antivirüs uyarısı, Google Play dışındaki uygulamalar için genel bir uyarıdır — gerçek bir tehlike yoktur.",
+  footer_sub:"AVRUPA'NIN ÖZEL TARAYICISI · REKLAM YOK · TAKİP YOK"
+};
+
+/* ===== УКРАЇНСЬКА ===== */
+I18N.uk = {
+  page_title:"BOBO Browser — Приватний перегляд",
+  overlay_title:"Оберіть мову",
+  overlay_sub:"Ви можете змінити це пізніше",
+  overlay_cont:"Продовжити",
+  hero_tagline:"Перегляд інтернету — це приватне право, а не можливість заробляти на користувачах.",
+  hero_sub:"ПРИВАТНИЙ БРАУЗЕР · WINDOWS & ANDROID · БЕЗКОШТОВНО · OPEN-SOURCE",
+  btn_download:"Завантажити для Windows",
+  hero_note:"v1.5 · Windows 10/11 · інсталятор .exe",
+  btn_download_android:"Завантажити для Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 МБ",
+  manifesto_h:"Браузер, який вас не відстежує",
+  manifesto_p:"BOBO побудований на простому принципі: те, що ви шукаєте і де переглядаєте, належить вам. Без історії, без постійних файлів cookie, без профілювання і без реклами. Ваш сеанс повністю видаляється при закритті браузера — кожного разу.",
+  features_h:"Що робить BOBO особливим",
+  f1_t:"Постійний приватний режим",
+  f1_d:"Без історії та постійних файлів cookie. При закритті сеанс зникає повністю, без слідів на диску.",
+  f2_t:"Вбудоване блокування реклами",
+  f2_d:"Понад 40 рекламних та відстежувальних доменів блокуються автоматично, з лічильником у реальному часі.",
+  f3_t:"Без відстеження",
+  f3_d:"BOBO не надсилає телеметрію і не будує профілів про вас. Ніхто за вами не стежить.",
+  f4_t:"Приватний пошук",
+  f4_d:"DuckDuckGo — стандартна пошукова система: пошукові запити не реєструються. Можна обрати Brave, Google або Bing.",
+  f5_t:"49 мов",
+  f5_d:"Інтерфейс доступний 49 мовами — європейськими, регіональними та міжнародними.",
+  f6_t:"Open-source",
+  f6_d:"Публічний та перевірений код, написаний на Python. Нічого прихованого, нічого за лаштунками.",
+  privacy_h:"Що BOBO НЕ зберігає",
+  privacy_intro:"Різниця між приватним та звичайним браузером видна в даних, які НЕ зберігаються.",
+  th_feature:"Дані",
+  th_others:"Звичайні браузери",
+  r1:"Історія перегляду",
+  r2:"Файли cookie після закриття",
+  r3:"Паролі та форми",
+  r4:"Рекламне профілювання",
+  r5:"Телеметрія виробнику",
+  v_no:"Ні",
+  v_yes:"Так",
+  download_h:"Завантажити зараз",
+  download_p:"BOBO Browser доступний для Windows та Android. Оберіть свою платформу.",
+  download_note:"Версія 1.5 · інсталятор Windows · ~131 МБ",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 або 11 · Мінімум 4 ГБ ОЗП · 500 МБ вільного місця",
+  plat_and_req:"Android 7.0+ · Будь-який Android-телефон або планшет · ~1,5 МБ",
+  android_note:"Версія 1.5 · Прямий APK · ~1,5 МБ",
+  badge_beta:"БЕТА",
+  install_h:"Як встановити Bobo Browser?",
+  install_intro:"Встановлення займає менше хвилини. Виконайте наведені нижче кроки.",
+  step1:"Завантажте файл <strong>bobo_browser_1.5.apk</strong> на пристрій Android, натиснувши зелену кнопку вище.",
+  step2:"Відкрийте завантажений файл з панелі сповіщень або з програми <strong>Файли / Завантаження</strong>.",
+  step3:"Якщо з'явиться повідомлення <strong>«Невідомі джерела»</strong>, увімкніть дозвіл:<span class=\"step-path\">Android 7–9: Налаштування → Безпека → Увімкнути «Встановлення з невідомих джерел»\nAndroid 10+: Налаштування → Програми → (використаний браузер) → Дозволити встановлення невідомих програм</span>",
+  step4:"Натисніть <strong>«Встановити»</strong> і зачекайте кілька секунд.",
+  step5:"Готово! Відкрийте <strong>Bobo Browser</strong> зі списку програм і насолоджуйтесь приватним переглядом.",
+  safety_text:"🛡️ <strong>Примітка щодо безпеки:</strong> Bobo Browser — це 100% безпечна програма від BoBo Soft. Не містить вірусів, реклами або збору даних. Якщо антивірус показує попередження, це загальне сповіщення для програм поза Google Play — без реальної небезпеки.",
+  footer_sub:"ЄВРОПЕЙСЬКИЙ ПРИВАТНИЙ БРАУЗЕР · БЕЗ РЕКЛАМИ · БЕЗ ВІДСТЕЖЕННЯ"
+};
+
+/* ===== БЪЛГАРСКИ ===== */
+I18N.bg = {
+  page_title:"BOBO Browser — Поверително сърфиране",
+  overlay_title:"Изберете език",
+  overlay_sub:"Можете да го промените по-късно",
+  overlay_cont:"Продължи",
+  hero_tagline:"Сърфирането в интернет е лично право, а не възможност за монетизиране на потребителите.",
+  hero_sub:"ПОВЕРИТЕЛЕН БРАУЗЪР · WINDOWS & ANDROID · БЕЗПЛАТЕН · OPEN-SOURCE",
+  btn_download:"Изтегли за Windows",
+  hero_note:"v1.5 · Windows 10/11 · инсталатор .exe",
+  btn_download_android:"Изтегли за Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 МБ",
+  manifesto_h:"Браузър, който не ви проследява",
+  manifesto_p:"BOBO е изграден на прост принцип: това, което търсите и където сърфирате, е ваше. Без история, без трайни бисквитки, без профилиране и без реклами. Сесията ви се изтрива напълно при затваряне — всеки път.",
+  features_h:"Какво прави BOBO различен",
+  f1_t:"Постоянен частен режим",
+  f1_d:"Без история и трайни бисквитки. При затваряне сесията изчезва напълно, без следи на диска.",
+  f2_t:"Вграден блокер на реклами",
+  f2_d:"Над 40 рекламни и проследяващи домейна блокирани автоматично, с брояч в реално време.",
+  f3_t:"Без проследяване",
+  f3_d:"BOBO не изпраща телеметрия и не изгражда профили за вас. Никой не ви наблюдава.",
+  f4_t:"Поверително търсене",
+  f4_d:"DuckDuckGo е търсачката по подразбиране — заявките не се записват. Можете да изберете и Brave, Google или Bing.",
+  f5_t:"49 езика",
+  f5_d:"Интерфейс достъпен на 49 езика — европейски, регионални и международни.",
+  f6_t:"Open-source",
+  f6_d:"Публичен, проверим код на Python. Нищо скрито, нищо зад завесата.",
+  privacy_h:"Какво НЕ съхранява BOBO",
+  privacy_intro:"Разликата между поверителен и обикновен браузър се вижда в данните, които НЕ се пазят.",
+  th_feature:"Данни",
+  th_others:"Обикновени браузъри",
+  r1:"История на сърфирането",
+  r2:"Бисквитки след затваряне",
+  r3:"Пароли и формуляри",
+  r4:"Рекламно профилиране",
+  r5:"Телеметрия към производителя",
+  v_no:"Не",
+  v_yes:"Да",
+  download_h:"Изтегли сега",
+  download_p:"BOBO Browser е достъпен за Windows и Android. Изберете платформата си.",
+  download_note:"Версия 1.5 · инсталатор Windows · ~131 МБ",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 или 11 · Минимум 4 ГБ RAM · 500 МБ свободно място",
+  plat_and_req:"Android 7.0+ · Всеки Android телефон или таблет · ~1,5 МБ",
+  android_note:"Версия 1.5 · Директен APK · ~1,5 МБ",
+  badge_beta:"БЕТА",
+  install_h:"Как да инсталирам Bobo Browser?",
+  install_intro:"Инсталацията отнема по-малко от минута. Следвайте стъпките по-долу.",
+  step1:"Изтеглете файла <strong>bobo_browser_1.5.apk</strong> на вашето Android устройство, като натиснете зеления бутон по-горе.",
+  step2:"Отворете изтегления файл от лентата с известия или от приложението <strong>Файлове / Изтегляния</strong>.",
+  step3:"Ако се появи съобщението <strong>«Неизвестни източници»</strong>, активирайте разрешението:<span class=\"step-path\">Android 7–9: Настройки → Сигурност → Активирайте «Инсталиране от неизвестни източници»\nAndroid 10+: Настройки → Приложения → (използван браузър) → Разрешете инсталирането на неизвестни приложения</span>",
+  step4:"Натиснете <strong>«Инсталиране»</strong> и изчакайте няколко секунди.",
+  step5:"Готово! Отворете <strong>Bobo Browser</strong> от списъка с приложения и се насладете на поверително сърфиране.",
+  safety_text:"🛡️ <strong>Бележка за сигурността:</strong> Bobo Browser е 100% безопасно приложение, разработено от BoBo Soft. Не съдържа вируси, реклами или събиране на данни. Предупреждение от антивирус е общо известие за приложения извън Google Play — без реална опасност.",
+  footer_sub:"ЕВРОПЕЙСКИ ПОВЕРИТЕЛЕН БРАУЗЪР · БЕЗ РЕКЛАМИ · БЕЗ ПРОСЛЕДЯВАНЕ"
+};
+
+/* ===== HRVATSKI ===== */
+I18N.hr = {
+  page_title:"BOBO Browser — Privatno pregledavanje",
+  overlay_title:"Odaberi jezik",
+  overlay_sub:"Možeš promijeniti to kasnije",
+  overlay_cont:"Nastavi",
+  hero_tagline:"Pregledavanje interneta je privatno pravo, a ne mogućnost monetizacije korisnika.",
+  hero_sub:"PRIVATNI PREGLEDNIK · WINDOWS & ANDROID · BESPLATNO · OPEN-SOURCE",
+  btn_download:"Preuzmi za Windows",
+  hero_note:"v1.5 · Windows 10/11 · instalacijski program .exe",
+  btn_download_android:"Preuzmi za Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Preglednik koji te ne prati",
+  manifesto_p:"BOBO je izgrađen na jednostavnom načelu: ono što tražiš i gdje pregledavaš pripada tebi. Bez povijesti, bez trajnih kolačića, bez profiliranja i bez oglasa. Tvoja sesija se potpuno briše pri zatvaranju preglednika — svaki put.",
+  features_h:"Što BOBO čini drugačijim",
+  f1_t:"Trajni privatni način",
+  f1_d:"Bez povijesti i trajnih kolačića. Pri zatvaranju sesija nestaje potpuno, bez tragova na disku.",
+  f2_t:"Ugrađeno blokiranje oglasa",
+  f2_d:"Više od 40 reklamnih i praćenih domena blokirano automatski, s brojačem u stvarnom vremenu.",
+  f3_t:"Bez praćenja",
+  f3_d:"BOBO ne šalje telemetriju i ne gradi profile o tebi. Nitko te ne promatra.",
+  f4_t:"Privatno pretraživanje",
+  f4_d:"DuckDuckGo je zadani motor — tvoja pretraživanja se ne bilježe. Možeš odabrati i Brave, Google ili Bing.",
+  f5_t:"49 jezika",
+  f5_d:"Sučelje dostupno na 49 jezika — europskim, regionalnim i međunarodnim.",
+  f6_t:"Open-source",
+  f6_d:"Javni, provjerljivi kod napisan u Pythonu. Ništa skriveno, ništa iza zavjese.",
+  privacy_h:"Što BOBO NE sprema",
+  privacy_intro:"Razlika između privatnog i običnog preglednika vidi se u podacima koji se NE čuvaju.",
+  th_feature:"Podaci",
+  th_others:"Obični preglednici",
+  r1:"Povijest pregledavanja",
+  r2:"Kolačići nakon zatvaranja",
+  r3:"Lozinke i obrasci",
+  r4:"Reklamno profiliranje",
+  r5:"Telemetrija proizvođaču",
+  v_no:"Ne",
+  v_yes:"Da",
+  download_h:"Preuzmi sada",
+  download_p:"BOBO Browser dostupan je za Windows i Android. Odaberi svoju platformu.",
+  download_note:"Verzija 1.5 · Windows instalacijski program · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 ili 11 · Najmanje 4 GB RAM · 500 MB slobodnog prostora",
+  plat_and_req:"Android 7.0+ · Bilo koji Android telefon ili tablet · ~1,5 MB",
+  android_note:"Verzija 1.5 · Izravni APK · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"Kako instalirati Bobo Browser?",
+  install_intro:"Instalacija traje manje od minute. Slijedi korake u nastavku.",
+  step1:"Preuzmi datoteku <strong>bobo_browser_1.5.apk</strong> na Android uređaj pritiskom na zeleni gumb gore.",
+  step2:"Otvori preuzetu datoteku iz trake obavijesti ili iz aplikacije <strong>Datoteke / Preuzimanja</strong>.",
+  step3:"Ako se pojavi poruka <strong>«Nepoznati izvori»</strong>, uključi dopuštenje:<span class=\"step-path\">Android 7–9: Postavke → Sigurnost → Uključi «Instalacija iz nepoznatih izvora»\nAndroid 10+: Postavke → Aplikacije → (korišteni preglednik) → Dopusti instalaciju nepoznatih aplikacija</span>",
+  step4:"Pritisni <strong>«Instaliraj»</strong> i pričekaj nekoliko sekundi.",
+  step5:"Gotovo! Otvori <strong>Bobo Browser</strong> s popisa aplikacija i uživaj u privatnom pregledavanju.",
+  safety_text:"🛡️ <strong>Sigurnosna napomena:</strong> Bobo Browser je 100% sigurna aplikacija tvrtke BoBo Soft. Ne sadrži viruse, oglase ni prikupljanje podataka. Antivirusno upozorenje je generično za aplikacije izvan Google Playa — bez stvarne opasnosti.",
+  footer_sub:"EUROPSKI PRIVATNI PREGLEDNIK · BEZ OGLASA · BEZ PRAĆENJA"
+};
+
+/* ===== CATALÀ ===== */
+I18N.ca = {
+  page_title:"BOBO Browser — Navegació privada",
+  overlay_title:"Tria el teu idioma",
+  overlay_sub:"Ho pots canviar més tard",
+  overlay_cont:"Continua",
+  hero_tagline:"Navegar per Internet és un dret privat, no una oportunitat de monetitzar els usuaris.",
+  hero_sub:"NAVEGADOR PRIVAT · WINDOWS & ANDROID · GRATUÏT · OPEN-SOURCE",
+  btn_download:"Descarrega per a Windows",
+  hero_note:"v1.5 · Windows 10/11 · instal·lador .exe",
+  btn_download_android:"Descarrega per a Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Un navegador que no et rastreja",
+  manifesto_p:"BOBO es basa en un principi simple: el que busques i on navegues et pertany. Sense historial, sense galetes persistents, sense perfiles i sense anuncis. La sessió s'esborra completament en tancar el navegador — sempre.",
+  features_h:"Què fa diferent el BOBO",
+  f1_t:"Mode privat permanent",
+  f1_d:"Sense historial ni galetes persistents. En tancar, la sessió desapareix completament, sense rastre al disc.",
+  f2_t:"Bloqueig d'anuncis integrat",
+  f2_d:"Més de 40 dominis publicitaris i de seguiment bloquejats automàticament, amb comptador en temps real.",
+  f3_t:"Sense seguiment",
+  f3_d:"BOBO no envia telemetria ni crea perfils sobre tu. Ningú et vigila.",
+  f4_t:"Cerca privada",
+  f4_d:"DuckDuckGo és el motor predeterminat — les cerques no es registren. Pots triar també Brave, Google o Bing.",
+  f5_t:"49 idiomes",
+  f5_d:"Interfície disponible en 49 idiomes — europeus, regionals i internacionals.",
+  f6_t:"Open-source",
+  f6_d:"Codi públic i verificable, escrit en Python. Res amagat, res darrere el teló.",
+  privacy_h:"Què NO guarda el BOBO",
+  privacy_intro:"La diferència entre un navegador privat i un normal es veu en les dades que NO es conserven.",
+  th_feature:"Dades",
+  th_others:"Navegadors comuns",
+  r1:"Historial de navegació",
+  r2:"Galetes en tancar",
+  r3:"Contrasenyes i formularis",
+  r4:"Perfilat publicitari",
+  r5:"Telemetria al proveïdor",
+  v_no:"No",
+  v_yes:"Sí",
+  download_h:"Descarrega ara",
+  download_p:"BOBO Browser està disponible per a Windows i Android. Tria la teva plataforma.",
+  download_note:"Versió 1.5 · instal·lador Windows · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 o 11 · Almenys 4 GB de RAM · 500 MB d'espai lliure",
+  plat_and_req:"Android 7.0+ · Qualsevol telèfon o tauleta Android · ~1,5 MB",
+  android_note:"Versió 1.5 · APK directe · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"Com instal·lar Bobo Browser?",
+  install_intro:"La instal·lació triga menys d'un minut. Segueix els passos de sota.",
+  step1:"Descarrega el fitxer <strong>bobo_browser_1.5.apk</strong> al teu dispositiu Android prement el botó verd de dalt.",
+  step2:"Obre el fitxer descarregat des de la barra de notificacions o des de l'app <strong>Fitxers / Descàrregues</strong>.",
+  step3:"Si apareix el missatge <strong>«Fonts desconegudes»</strong>, activa el permís:<span class=\"step-path\">Android 7–9: Configuració → Seguretat → Activa «Instal·lació des de fonts desconegudes»\nAndroid 10+: Configuració → Aplicacions → (el navegador usat) → Permet instal·lació d'apps desconegudes</span>",
+  step4:"Toca <strong>«Instal·la»</strong> i espera uns segons.",
+  step5:"Fet! Obre <strong>Bobo Browser</strong> de la llista d'apps i gaudeix de la navegació privada.",
+  safety_text:"🛡️ <strong>Nota de seguretat:</strong> Bobo Browser és una aplicació 100% segura de BoBo Soft. No conté virus, anuncis ni recollida de dades. Una advertència antivirus és un avís genèric per apps fora de Google Play — sense perill real.",
+  footer_sub:"NAVEGADOR PRIVAT EUROPEU · SENSE ANUNCIS · SENSE SEGUIMENT"
+};
+
+/* ===== EESTI ===== */
+I18N.et = {
+  page_title:"BOBO Browser — Privaatne sirvimine",
+  overlay_title:"Vali oma keel",
+  overlay_sub:"Saad seda hiljem muuta",
+  overlay_cont:"Jätka",
+  hero_tagline:"Interneti sirvimine on privaatne õigus, mitte kasutajate monetiseerimise võimalus.",
+  hero_sub:"PRIVAATNE BRAUSER · WINDOWS & ANDROID · TASUTA · OPEN-SOURCE",
+  btn_download:"Laadi alla Windowsile",
+  hero_note:"v1.5 · Windows 10/11 · .exe installer",
+  btn_download_android:"Laadi alla Androidile",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Brauser, mis sind ei jälgi",
+  manifesto_p:"BOBO on ehitatud lihtsale põhimõttele: mida otsid ja kus sirvid, kuulub sulle. Ajalugu puudub, püsivaid küpsiseid pole, profileerimist pole ja reklaame pole. Sinu seanss kustutatakse brauseri sulgemisel täielikult — iga kord.",
+  features_h:"Mis teeb BOBO erinevaks",
+  f1_t:"Püsiv privaatne režiim",
+  f1_d:"Ajalugu ja püsivad küpsised puuduvad. Sulgemisel kaob seanss jäljetult.",
+  f2_t:"Sisseehitatud reklaamiblokeerija",
+  f2_d:"Üle 40 reklaami- ja jälgimisdomeeeni blokeeritakse automaatselt reaalajas.",
+  f3_t:"Jälgimine puudub",
+  f3_d:"BOBO ei saada telemetriat ega loo sinu kohta profiile. Keegi ei vaata su järele.",
+  f4_t:"Privaatne otsing",
+  f4_d:"DuckDuckGo on vaikemootor — otsingud ei logita. Saad valida ka Brave, Google või Bing.",
+  f5_t:"49 keelt",
+  f5_d:"Liides saadaval 49 keeles — Euroopa, piirkondlikud ja rahvusvahelised.",
+  f6_t:"Open-source",
+  f6_d:"Avalik, kontrollitav Python-kood. Midagi pole peidetud, midagi pole kardina taga.",
+  privacy_h:"Mida BOBO EI salvesta",
+  privacy_intro:"Erinevus privaatse ja tavalise brauseri vahel on näha andmetes, mida EI hoita.",
+  th_feature:"Andmed",
+  th_others:"Tavalised brauserid",
+  r1:"Sirvimisajalugu",
+  r2:"Küpsised pärast sulgemist",
+  r3:"Paroolid ja vormid",
+  r4:"Reklaami profiil",
+  r5:"Telemetria tarnijale",
+  v_no:"Ei",
+  v_yes:"Jah",
+  download_h:"Laadi alla kohe",
+  download_p:"BOBO Browser on saadaval Windowsile ja Androidile. Vali oma platvorm.",
+  download_note:"Versioon 1.5 · Windowsi installer · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 või 11 · Vähemalt 4 GB RAM · 500 MB vaba ruumi",
+  plat_and_req:"Android 7.0+ · Iga Android-telefon või tahvelarvuti · ~1,5 MB",
+  android_note:"Versioon 1.5 · Otse APK · ~1,5 MB",
+  badge_beta:"BEETA",
+  install_h:"Kuidas installida Bobo Browser?",
+  install_intro:"Installimine võtab vähem kui minuti. Järgi allolevaid samme.",
+  step1:"Laadi fail <strong>bobo_browser_1.5.apk</strong> oma Android-seadmesse, vajutades üleval olevale rohelisele nupule.",
+  step2:"Ava allalaaditud fail teavitusribalt või rakendusest <strong>Failid / Allalaadimised</strong>.",
+  step3:"Kui ilmub teade <strong>«Tundmatud allikad»</strong>, luba õigus:<span class=\"step-path\">Android 7–9: Seaded → Turvalisus → Luba «Installimine tundmatutest allikatest»\nAndroid 10+: Seaded → Rakendused → (kasutatud brauser) → Luba tundmatute rakenduste installimine</span>",
+  step4:"Vajuta <strong>«Installi»</strong> ja oota mõni sekund.",
+  step5:"Valmis! Ava <strong>Bobo Browser</strong> rakenduste loendist ja naudi privaatset sirvimist.",
+  safety_text:"🛡️ <strong>Turvaline märkus:</strong> Bobo Browser on 100% turvaline BoBo Soft rakendus. Viirused, reklaamid ja andmete kogumine puuduvad. Viirusetõrje hoiatus on üldine märge Google Play välistele rakendustele — reaalset ohtu pole.",
+  footer_sub:"EUROOPA PRIVAATNE BRAUSER · REKLAAMID PUUDUVAD · JÄLGIMINE PUUDUB"
+};
+
+/* ===== LATVIEŠU ===== */
+I18N.lv = {
+  page_title:"BOBO Browser — Privāta pārlūkošana",
+  overlay_title:"Izvēlieties valodu",
+  overlay_sub:"To var mainīt vēlāk",
+  overlay_cont:"Turpināt",
+  hero_tagline:"Pārlūkošana internetā ir privātas tiesības, nevis iespēja monetizēt lietotājus.",
+  hero_sub:"PRIVĀTĀ PĀRLŪKPROGRAMMA · WINDOWS & ANDROID · BEZMAKSAS · OPEN-SOURCE",
+  btn_download:"Lejupielādēt priekš Windows",
+  hero_note:"v1.5 · Windows 10/11 · .exe instalētājs",
+  btn_download_android:"Lejupielādēt priekš Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Pārlūkprogramma, kas jūs neseko",
+  manifesto_p:"BOBO ir veidots uz vienkārša principa: tas, ko meklējat un kur pārlūkojat, pieder jums. Nav vēstures, nav pastāvīgu sīkfailu, nav profilēšanas un nav reklāmu. Jūsu sesija tiek pilnībā dzēsta, aizverot pārlūkprogrammu — katru reizi.",
+  features_h:"Kas padara BOBO atšķirīgu",
+  f1_t:"Pastāvīgs privātais režīms",
+  f1_d:"Nav vēstures un pastāvīgu sīkfailu. Aizverot sesija pazūd pilnībā, bez pēdām diskā.",
+  f2_t:"Iebūvēta reklāmu bloķēšana",
+  f2_d:"Vairāk nekā 40 reklāmas un izsekošanas domēni automātiski bloķēti, ar reāllaika skaitītāju.",
+  f3_t:"Nav izsekošanas",
+  f3_d:"BOBO nesūta telemetriju un neveidoja profilus par jums. Neviens jūs nevēro.",
+  f4_t:"Privāta meklēšana",
+  f4_d:"DuckDuckGo ir noklusējuma dzinējs — jūsu meklējumi netiek reģistrēti. Varat izvēlēties arī Brave, Google vai Bing.",
+  f5_t:"49 valodas",
+  f5_d:"Interfeiss pieejams 49 valodās — Eiropas, reģionālās un starptautiskās.",
+  f6_t:"Open-source",
+  f6_d:"Publisks, pārbaudāms Python kods. Nekas nav slēpts, nekas aiz aizkariem.",
+  privacy_h:"Ko BOBO NEGLABĀ",
+  privacy_intro:"Atšķirība starp privātu un parastu pārlūkprogrammu redzama datos, kas NETIEK glabāti.",
+  th_feature:"Dati",
+  th_others:"Parastās pārlūkprogrammas",
+  r1:"Pārlūkošanas vēsture",
+  r2:"Sīkfaili pēc aizvēršanas",
+  r3:"Paroles un veidlapas",
+  r4:"Reklāmas profilēšana",
+  r5:"Telemetrija piegādātājam",
+  v_no:"Nē",
+  v_yes:"Jā",
+  download_h:"Lejupielādēt tagad",
+  download_p:"BOBO Browser ir pieejams Windows un Android. Izvēlieties savu platformu.",
+  download_note:"Versija 1.5 · Windows instalētājs · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 vai 11 · Vismaz 4 GB RAM · 500 MB brīvas vietas",
+  plat_and_req:"Android 7.0+ · Jebkurš Android tālrunis vai planšetdators · ~1,5 MB",
+  android_note:"Versija 1.5 · Tiešs APK · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"Kā instalēt Bobo Browser?",
+  install_intro:"Instalēšana aizņem mazāk nekā minūti. Izpildiet tālāk norādītās darbības.",
+  step1:"Lejupielādējiet failu <strong>bobo_browser_1.5.apk</strong> savā Android ierīcē, nospiežot zaļo pogu iepriekš.",
+  step2:"Atveriet lejupielādēto failu no paziņojumu joslas vai no lietotnes <strong>Faili / Lejupielādes</strong>.",
+  step3:"Ja parādās ziņojums <strong>«Nezināmi avoti»</strong>, iespējojiet atļauju:<span class=\"step-path\">Android 7–9: Iestatījumi → Drošība → Iespējot «Instalēšana no nezināmiem avotiem»\nAndroid 10+: Iestatījumi → Lietotnes → (izmantotā pārlūkprogramma) → Atļaut nezināmu lietotņu instalēšanu</span>",
+  step4:"Nospiediet <strong>«Instalēt»</strong> un uzgaidiet dažas sekundes.",
+  step5:"Gatavs! Atveriet <strong>Bobo Browser</strong> no lietotņu saraksta un baudiet privātu pārlūkošanu.",
+  safety_text:"🛡️ <strong>Drošības piezīme:</strong> Bobo Browser ir 100% droša BoBo Soft lietotne. Nesatur vīrusus, reklāmas vai datu vākšanu. Antivīrusa brīdinājums ir vispārējs paziņojums par lietotnēm ārpus Google Play — nav reālu draudu.",
+  footer_sub:"EIROPAS PRIVĀTĀ PĀRLŪKPROGRAMMA · BEZ REKLĀMĀM · BEZ IZSEKOŠANAS"
+};
+
+/* ===== LIETUVIŲ ===== */
+I18N.lt = {
+  page_title:"BOBO Browser — Privatus naršymas",
+  overlay_title:"Pasirinkite kalbą",
+  overlay_sub:"Tai galėsite pakeisti vėliau",
+  overlay_cont:"Tęsti",
+  hero_tagline:"Naršymas internete yra privati teisė, o ne galimybė uždirbti iš vartotojų.",
+  hero_sub:"PRIVATI NARŠYKLĖ · WINDOWS & ANDROID · NEMOKAMA · OPEN-SOURCE",
+  btn_download:"Atsisiųsti Windows",
+  hero_note:"v1.5 · Windows 10/11 · .exe diegimo programa",
+  btn_download_android:"Atsisiųsti Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Naršyklė, kuri jūsų neseka",
+  manifesto_p:"BOBO sukurta remiantis paprastu principu: tai, ko ieškote ir kur naršote, priklauso jums. Jokios istorijos, jokių nuolatinių slapukų, jokio profiliavimo ir jokių skelbimų. Jūsų sesija visiškai ištrintama uždarius naršyklę — kiekvieną kartą.",
+  features_h:"Kas daro BOBO kitokiu",
+  f1_t:"Nuolatinis privatumo režimas",
+  f1_d:"Jokios istorijos ir nuolatinių slapukų. Uždarius sesija dingsta visiškai, be pėdsakų diske.",
+  f2_t:"Integruotas skelbimų blokavimas",
+  f2_d:"Daugiau kaip 40 reklamos ir sekimo domenų automatiškai blokuojami, su realaus laiko skaitikliu.",
+  f3_t:"Jokio sekimo",
+  f3_d:"BOBO nesiunčia telemetrijos ir nekuria profilių apie jus. Niekas jūsų nestebi.",
+  f4_t:"Privati paieška",
+  f4_d:"DuckDuckGo yra numatytoji paieška — užklausos neregistruojamos. Galite rinktis ir Brave, Google ar Bing.",
+  f5_t:"49 kalbos",
+  f5_d:"Sąsaja prieinama 49 kalbomis — Europos, regioninėmis ir tarptautinėmis.",
+  f6_t:"Open-source",
+  f6_d:"Viešas, patikrinamas Python kodas. Niekas nėra paslėpta, niekas už užuolaidos.",
+  privacy_h:"Ko BOBO NESAUGO",
+  privacy_intro:"Skirtumas tarp privataus ir įprasto naršyklės matomas duomenyse, kurie NESAUGOMI.",
+  th_feature:"Duomenys",
+  th_others:"Įprastos naršyklės",
+  r1:"Naršymo istorija",
+  r2:"Slapukai po uždarymo",
+  r3:"Slaptažodžiai ir formos",
+  r4:"Reklamos profiliavimas",
+  r5:"Telemetrija gamintojui",
+  v_no:"Ne",
+  v_yes:"Taip",
+  download_h:"Atsisiųsti dabar",
+  download_p:"BOBO Browser pasiekiamas Windows ir Android. Pasirinkite savo platformą.",
+  download_note:"Versija 1.5 · Windows diegimo programa · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 arba 11 · Mažiausiai 4 GB RAM · 500 MB laisvo vietos",
+  plat_and_req:"Android 7.0+ · Bet koks Android telefonas ar planšetė · ~1,5 MB",
+  android_note:"Versija 1.5 · Tiesioginis APK · ~1,5 MB",
+  badge_beta:"BETA",
+  install_h:"Kaip įdiegti Bobo Browser?",
+  install_intro:"Diegimas trunka mažiau nei minutę. Atlikite žemiau nurodytus veiksmus.",
+  step1:"Atsisiųskite failą <strong>bobo_browser_1.5.apk</strong> į savo Android įrenginį spustelėję žalią mygtuką aukščiau.",
+  step2:"Atidarykite atsisiųstą failą iš pranešimų juostos arba iš programos <strong>Failai / Atsisiuntimai</strong>.",
+  step3:"Jei pasirodo pranešimas <strong>«Nežinomi šaltiniai»</strong>, suteikite leidimą:<span class=\"step-path\">Android 7–9: Nustatymai → Sauga → Įgalinti «Diegimą iš nežinomų šaltinių»\nAndroid 10+: Nustatymai → Programos → (naudota naršyklė) → Leisti diegti nežinomas programas</span>",
+  step4:"Paspauskite <strong>«Diegti»</strong> ir palaukite kelias sekundes.",
+  step5:"Atlikta! Atidarykite <strong>Bobo Browser</strong> iš programų sąrašo ir mėgaukitės privačiu naršymu.",
+  safety_text:"🛡️ <strong>Saugos pastaba:</strong> Bobo Browser yra 100% saugi BoBo Soft programa. Joje nėra virusų, reklamų ar duomenų rinkimo. Antiviruso įspėjimas yra bendras pranešimas programoms ne iš Google Play — jokio realaus pavojaus.",
+  footer_sub:"EUROPOS PRIVATI NARŠYKLĖ · BE SKELBIMŲ · BE SEKIMO"
+};
+
+/* ===== BOSANSKI ===== */
+I18N.bs = {
+  page_title:"BOBO Browser — Privatno pregledavanje",
+  overlay_title:"Odaberi jezik",
+  overlay_sub:"Možeš promijeniti to kasnije",
+  overlay_cont:"Nastavi",
+  hero_tagline:"Pregledavanje interneta je privatno pravo, a ne mogućnost monetizacije korisnika.",
+  hero_sub:"PRIVATNI PREGLEDNIK · WINDOWS & ANDROID · BESPLATNO · OPEN-SOURCE",
+  btn_download:"Preuzmi za Windows",
+  hero_note:"v1.5 · Windows 10/11 · instalacijski program .exe",
+  btn_download_android:"Preuzmi za Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Preglednik koji te ne prati",
+  manifesto_p:"BOBO je izgrađen na jednostavnom načelu: ono što tražiš i gdje pregledavaš pripada tebi. Bez historije, bez trajnih kolačića, bez profiliranja i bez oglasa. Tvoja sesija se potpuno briše pri zatvaranju — svaki put.",
+  features_h:"Što BOBO čini drugačijim",
+  f1_t:"Trajni privatni način",f1_d:"Bez historije i trajnih kolačića. Pri zatvaranju sesija nestaje bez traga.",
+  f2_t:"Ugrađeno blokiranje oglasa",f2_d:"Više od 40 reklamnih domena blokirano automatski s brojačem u realnom vremenu.",
+  f3_t:"Bez praćenja",f3_d:"BOBO ne šalje telemetriju i ne gradi profile o tebi.",
+  f4_t:"Privatno pretraživanje",f4_d:"DuckDuckGo je zadani motor — pretraživanja se ne bilježe.",
+  f5_t:"49 jezika",f5_d:"Sučelje dostupno na 49 jezika — europskim, regionalnim i međunarodnim.",
+  f6_t:"Open-source",f6_d:"Javni, provjerljivi kod u Pythonu. Ništa skriveno.",
+  privacy_h:"Što BOBO NE sprema",
+  privacy_intro:"Razlika između privatnog i običnog preglednika vidi se u podacima koji se NE čuvaju.",
+  th_feature:"Podaci",th_others:"Obični preglednici",
+  r1:"Historija pregledavanja",r2:"Kolačići nakon zatvaranja",r3:"Lozinke i obrasci",r4:"Reklamno profiliranje",r5:"Telemetrija proizvođaču",
+  v_no:"Ne",v_yes:"Da",
+  download_h:"Preuzmi sada",download_p:"BOBO Browser dostupan je za Windows i Android.",
+  download_note:"Verzija 1.5 · Windows · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 ili 11 · 4 GB RAM · 500 MB prostora",
+  plat_and_req:"Android 7.0+ · ~1,5 MB",android_note:"Verzija 1.5 · APK · ~1,5 MB",badge_beta:"BETA",
+  install_h:"Kako instalirati Bobo Browser?",install_intro:"Instalacija traje manje od minute.",
+  step1:"Preuzmi <strong>bobo_browser_1.5.apk</strong> pritiskom na zeleni gumb.",
+  step2:"Otvori preuzetu datoteku iz obavijesti ili <strong>Datoteke / Preuzimanja</strong>.",
+  step3:"Za <strong>«Nepoznati izvori»</strong>:<span class=\"step-path\">Android 7–9: Postavke → Sigurnost → Instaliraj iz nepoznatih izvora\nAndroid 10+: Postavke → Aplikacije → Dopusti nepoznate aplikacije</span>",
+  step4:"Pritisni <strong>«Instaliraj»</strong>.",step5:"Gotovo! Uživaj u privatnom pregledavanju.",
+  safety_text:"🛡️ <strong>Sigurnosna napomena:</strong> Bobo Browser je sigurna aplikacija BoBo Soft. Bez virusa, reklama i prikupljanja podataka.",
+  footer_sub:"EUROPSKI PRIVATNI PREGLEDNIK · BEZ OGLASA · BEZ PRAĆENJA"
+};
+
+/* ===== СРПСКИ ===== */
+I18N.sr = {
+  page_title:"BOBO Browser — Приватно прегледање",
+  overlay_title:"Изабери језик",
+  overlay_sub:"Можеш то касније да промениш",
+  overlay_cont:"Настави",
+  hero_tagline:"Прегледање интернета је приватно право, а не прилика за монетизацију корисника.",
+  hero_sub:"ПРИВАТНИ ПРЕГЛЕДАЧ · WINDOWS & ANDROID · БЕСПЛАТНО · OPEN-SOURCE",
+  btn_download:"Преузми за Windows",
+  hero_note:"v1.5 · Windows 10/11 · инсталациони програм .exe",
+  btn_download_android:"Преузми за Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Прегледач који те не прати",
+  manifesto_p:"BOBO је изграђен на простом принципу: оно што тражиш и где прегледаш припада теби. Без историје, без трајних колачића, без профилисања и без огласа. Твоја сесија се потпуно брише при затварању — сваки пут.",
+  features_h:"Шта BOBO чини другачијим",
+  f1_t:"Трајни приватни режим",f1_d:"Без историје и трајних колачића. При затварању сесија нестаје без трага.",
+  f2_t:"Уграђено блокирање огласа",f2_d:"Преко 40 рекламних домена блокирано аутоматски са бројачем у реалном времену.",
+  f3_t:"Без праћења",f3_d:"BOBO не шаље телеметрију и не гради профиле о теби.",
+  f4_t:"Приватна претрага",f4_d:"DuckDuckGo је подразумевани мотор — претраге се не бележе.",
+  f5_t:"49 језика",f5_d:"Интерфејс доступан на 49 језика — европским, регионалним и међународним.",
+  f6_t:"Open-source",f6_d:"Јавни, провјерљиви код у Питону. Ништа скривено.",
+  privacy_h:"Шта BOBO НЕ чува",
+  privacy_intro:"Разлика између приватног и обичног прегледача видљива је у подацима који се НЕ чувају.",
+  th_feature:"Подаци",th_others:"Обични прегледачи",
+  r1:"Историја прегледања",r2:"Колачићи након затварања",r3:"Лозинке и обрасци",r4:"Рекламно профилисање",r5:"Телеметрија произвођачу",
+  v_no:"Не",v_yes:"Да",
+  download_h:"Преузми сада",download_p:"BOBO Browser је доступан за Windows и Android.",
+  download_note:"Верзија 1.5 · Windows · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 или 11 · 4 GB RAM · 500 MB простора",
+  plat_and_req:"Android 7.0+ · ~1,5 MB",android_note:"Верзија 1.5 · APK · ~1,5 MB",badge_beta:"БЕТА",
+  install_h:"Како инсталирати Bobo Browser?",install_intro:"Инсталација траје мање од минута.",
+  step1:"Преузми <strong>bobo_browser_1.5.apk</strong> притиском на зелено дугме.",
+  step2:"Отвори преузету датотеку из обавештења или <strong>Датотеке / Преузимања</strong>.",
+  step3:"За <strong>«Непознати извори»</strong>:<span class=\"step-path\">Android 7–9: Подешавања → Безбедност → Инсталирање из непознатих извора\nAndroid 10+: Подешавања → Апликације → Дозволи непознате апликације</span>",
+  step4:"Притисни <strong>«Инсталирај»</strong>.",step5:"Готово! Уживај у приватном прегледању.",
+  safety_text:"🛡️ <strong>Безбедносна напомена:</strong> Bobo Browser је безбедна апликација BoBo Soft. Без вируса, реклама и прикупљања података.",
+  footer_sub:"ЕВРОПСКИ ПРИВАТНИ ПРЕГЛЕДАЧ · БЕЗ ОГЛАСА · БЕЗ ПРАЋЕЊА"
+};
+
+/* ===== МАКЕДОНСКИ ===== */
+I18N.mk = {
+  page_title:"BOBO Browser — Приватно прелистување",
+  overlay_title:"Изберете јазик",
+  overlay_sub:"Можете да го промените подоцна",
+  overlay_cont:"Продолжи",
+  hero_tagline:"Сурфањето на интернет е приватно право, а не можност за монетизација на корисниците.",
+  hero_sub:"ПРИВАТЕН ПРЕЛИСТУВАЧ · WINDOWS & ANDROID · БЕСПЛАТНО · OPEN-SOURCE",
+  btn_download:"Преземи за Windows",hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"Преземи за Android",hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Прелистувач кој не ве следи",
+  manifesto_p:"BOBO е изграден на едноставен принцип: она што го барате и каде прелистувате ви припаѓа вам. Без историја, без постојани колачиња, без профилирање и без реклами.",
+  features_h:"Што BOBO го прави различен",
+  f1_t:"Постојан приватен режим",f1_d:"Без историја и постојани колачиња. Сесијата исчезнува при затворање.",
+  f2_t:"Вграден блокатор на реклами",f2_d:"Над 40 домени блокирани автоматски со бројач во реално време.",
+  f3_t:"Без следење",f3_d:"BOBO не праќа телеметрија и не гради профили за вас.",
+  f4_t:"Приватно пребарување",f4_d:"DuckDuckGo е стандардниот мотор — пребарувањата не се евидентираат.",
+  f5_t:"49 јазици",f5_d:"Интерфејс достапен на 49 јазици.",
+  f6_t:"Open-source",f6_d:"Јавен, верификуван Python код. Ништо скриено.",
+  privacy_h:"Што BOBO НЕ зачувува",
+  privacy_intro:"Разликата помеѓу приватен и обичен прелистувач е во податоците кои НЕ се зачувуваат.",
+  th_feature:"Податоци",th_others:"Обични прелистувачи",
+  r1:"Историја на прелистување",r2:"Колачиња по затворање",r3:"Лозинки и форми",r4:"Рекламно профилирање",r5:"Телеметрија на производителот",
+  v_no:"Не",v_yes:"Да",
+  download_h:"Преземи сега",download_p:"BOBO Browser е достапен за Windows и Android.",
+  download_note:"Верзија 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 или 11 · 4 GB RAM · 500 MB",plat_and_req:"Android 7.0+ · ~1,5 MB",
+  android_note:"Верзија 1.5 · APK · ~1,5 MB",badge_beta:"БЕТА",
+  install_h:"Како да инсталирам Bobo Browser?",install_intro:"Инсталацијата трае помалку од минута.",
+  step1:"Преземи <strong>bobo_browser_1.5.apk</strong> со притискање на зеленото копче.",
+  step2:"Отвори го преземениот фајл од известувања или <strong>Датотеки / Преземања</strong>.",
+  step3:"За <strong>«Непознати извори»</strong>:<span class=\"step-path\">Android 7–9: Поставки → Безбедност → Инсталирање од непознати извори\nAndroid 10+: Поставки → Апликации → Дозволи непознати апликации</span>",
+  step4:"Притисни <strong>«Инсталирај»</strong>.",step5:"Готово! Уживај во приватно прелистување.",
+  safety_text:"🛡️ <strong>Безбедносна напомена:</strong> Bobo Browser е безбедна апликација на BoBo Soft. Без вируси, реклами или собирање податоци.",
+  footer_sub:"ЕВРОПСКИ ПРИВАТЕН ПРЕЛИСТУВАЧ · БЕЗ РЕКЛАМИ · БЕЗ СЛЕДЕЊЕ"
+};
+
+/* ===== SLOVENŠČINA ===== */
+I18N.sl = {
+  page_title:"BOBO Browser — Zasebno brskanje",
+  overlay_title:"Izberite jezik",
+  overlay_sub:"To lahko spremenite pozneje",
+  overlay_cont:"Nadaljuj",
+  hero_tagline:"Brskanje po spletu je zasebna pravica, ne priložnost za monetizacijo uporabnikov.",
+  hero_sub:"ZASEBNI BRSKALNIK · WINDOWS & ANDROID · BREZPLAČNO · OPEN-SOURCE",
+  btn_download:"Prenesi za Windows",hero_note:"v1.5 · Windows 10/11 · namestitveni program .exe",
+  btn_download_android:"Prenesi za Android",hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Brskalnik, ki vas ne sledi",
+  manifesto_p:"BOBO je zgrajen na preprostem načelu: kar iščete in kje brskate, pripada vam. Brez zgodovine, brez trajnih piškotkov, brez profiliranja in brez oglasov. Vaša seja se ob zaprtju popolnoma izbriše — vsakič.",
+  features_h:"Kaj naredi BOBO drugačnega",
+  f1_t:"Trajen zasebni način",f1_d:"Brez zgodovine in trajnih piškotkov. Ob zaprtju seja izgine brez sledu.",
+  f2_t:"Vgrajeno blokiranje oglasov",f2_d:"Več kot 40 oglaševalskih domen blokiranih samodejno s števcem v realnem času.",
+  f3_t:"Brez sledenja",f3_d:"BOBO ne pošilja telemetrije in ne gradi profilov o vas.",
+  f4_t:"Zasebno iskanje",f4_d:"DuckDuckGo je privzeti iskalnik — iskanja niso evidentirana.",
+  f5_t:"49 jezikov",f5_d:"Vmesnik na voljo v 49 jezikih — evropskih, regionalnih in mednarodnih.",
+  f6_t:"Open-source",f6_d:"Javna, preverljiva koda v Pythonu. Nič skritega.",
+  privacy_h:"Česa BOBO NE hrani",
+  privacy_intro:"Razlika med zasebnim in navadnim brskalnikom je v podatkih, ki se NE hranijo.",
+  th_feature:"Podatki",th_others:"Navadni brskalniki",
+  r1:"Zgodovina brskanja",r2:"Piškotki po zaprtju",r3:"Gesla in obrazci",r4:"Oglaševalsko profiliranje",r5:"Telemetrija prodajalcu",
+  v_no:"Ne",v_yes:"Da",
+  download_h:"Prenesi zdaj",download_p:"BOBO Browser je na voljo za Windows in Android.",
+  download_note:"Različica 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 ali 11 · 4 GB RAM · 500 MB prostora",plat_and_req:"Android 7.0+ · ~1,5 MB",
+  android_note:"Različica 1.5 · APK · ~1,5 MB",badge_beta:"BETA",
+  install_h:"Kako namestiti Bobo Browser?",install_intro:"Namestitev traja manj kot minuto.",
+  step1:"Prenesi <strong>bobo_browser_1.5.apk</strong> s pritiskom na zeleni gumb.",
+  step2:"Odpri preneseno datoteko iz vrstice z obvestili ali iz <strong>Datoteke / Prenosi</strong>.",
+  step3:"Za <strong>«Neznani viri»</strong>:<span class=\"step-path\">Android 7–9: Nastavitve → Varnost → Namestitev iz neznanih virov\nAndroid 10+: Nastavitve → Aplikacije → Dovoli neznane aplikacije</span>",
+  step4:"Tapni <strong>«Namesti»</strong>.",step5:"Opravljeno! Uživaj v zasebnem brskanju.",
+  safety_text:"🛡️ <strong>Varnostna opomba:</strong> Bobo Browser je varna aplikacija BoBo Soft. Brez virusov, oglasov ali zbiranja podatkov.",
+  footer_sub:"EVROPSKI ZASEBNI BRSKALNIK · BREZ OGLASOV · BREZ SLEDENJA"
+};
+
+/* ===== БЕЛАРУСКАЯ ===== */
+I18N.be = {
+  page_title:"BOBO Browser — Прыватны прагляд",
+  overlay_title:"Выберыце мову",
+  overlay_sub:"Вы можаце змяніць гэта пазней",
+  overlay_cont:"Працягнуць",
+  hero_tagline:"Прагляд інтэрнэту — гэта прыватнае права, а не магчымасць зарабляць на карыстальніках.",
+  hero_sub:"ПРЫВАТНЫ БРАЎЗЕР · WINDOWS & ANDROID · БЯСПЛАТНА · OPEN-SOURCE",
+  btn_download:"Спампаваць для Windows",hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"Спампаваць для Android",hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 МБ",
+  manifesto_h:"Браўзер, які вас не адсочвае",
+  manifesto_p:"BOBO пабудаваны на простым прынцыпе: тое, што вы шукаеце і дзе гартаеце, належыць вам. Без гісторыі, без пастаянных файлаў cookie, без прафіліравання і без рэкламы.",
+  features_h:"Што робіць BOBO асаблівым",
+  f1_t:"Пастаянны прыватны рэжым",f1_d:"Без гісторыі і пастаянных cookie. Пры закрыцці сесія знікае без следу.",
+  f2_t:"Убудаванае блакіраванне рэкламы",f2_d:"Больш за 40 рэкламных дамен блакіруюцца аўтаматычна.",
+  f3_t:"Без адсочвання",f3_d:"BOBO не адпраўляе тэлеметрыю і не будуе профілі аб вас.",
+  f4_t:"Прыватны пошук",f4_d:"DuckDuckGo — стандартная пошукавая сістэма.",
+  f5_t:"49 моў",f5_d:"Інтэрфейс даступны ў 49 мовах.",
+  f6_t:"Open-source",f6_d:"Публічны, правераны код на Python.",
+  privacy_h:"Што BOBO НЕ захоўвае",privacy_intro:"Розніца відна ў даных, якія НЕ захоўваюцца.",
+  th_feature:"Даныя",th_others:"Звычайныя браўзеры",
+  r1:"Гісторыя прагляду",r2:"Cookie пасля закрыцця",r3:"Паролі і формы",r4:"Рэкламнае прафіліраванне",r5:"Тэлеметрыя вытворцу",
+  v_no:"Не",v_yes:"Так",
+  download_h:"Спампаваць зараз",download_p:"BOBO Browser даступны для Windows і Android.",
+  download_note:"Версія 1.5 · ~131 МБ",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 або 11 · 4 ГБ RAM · 500 МБ",plat_and_req:"Android 7.0+ · ~1,5 МБ",
+  android_note:"Версія 1.5 · APK · ~1,5 МБ",badge_beta:"БЭТА",
+  install_h:"Як усталяваць Bobo Browser?",install_intro:"Усталяванне займае менш за хвіліну.",
+  step1:"Спампуйце <strong>bobo_browser_1.5.apk</strong> кнопкай вышэй.",
+  step2:"Адкрыйце файл з панэлі апавяшчэнняў або з <strong>Файлы / Загрузкі</strong>.",
+  step3:"Для <strong>«Невядомыя крыніцы»</strong>:<span class=\"step-path\">Android 7–9: Налады → Бяспека → Усталяванне з невядомых крыніц\nAndroid 10+: Налады → Праграмы → Дазволіць невядомыя праграмы</span>",
+  step4:"Націсніце <strong>«Усталяваць»</strong>.",step5:"Гатова! Карыстайцеся прыватным праглядам.",
+  safety_text:"🛡️ <strong>Заўвага бяспекі:</strong> Bobo Browser — бяспечная праграма BoBo Soft. Без вірусаў, рэкламы і збору даных.",
+  footer_sub:"ЕЎРАПЕЙСКІ ПРЫВАТНЫ БРАЎЗЕР · БЕЗ РЭКЛАМЫ · БЕЗ АДСОЧВАННЯ"
+};
+
+/* ===== GALEGO ===== */
+I18N.gl = {
+  page_title:"BOBO Browser — Navegación privada",
+  overlay_title:"Escolle o teu idioma",
+  overlay_sub:"Podes cambialo máis tarde",
+  overlay_cont:"Continuar",
+  hero_tagline:"Navegar por Internet é un dereito privado, non unha oportunidade de monetizar os usuarios.",
+  hero_sub:"NAVEGADOR PRIVADO · WINDOWS & ANDROID · GRATUÍTO · OPEN-SOURCE",
+  btn_download:"Descargar para Windows",hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"Descargar para Android",hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Un navegador que non te rastrea",
+  manifesto_p:"BOBO baséase nun principio simple: o que buscas e onde navegas é teu. Sen historial, sen cookies persistentes, sen perfiles e sen anuncios.",
+  features_h:"Que fai diferente ao BOBO",
+  f1_t:"Modo privado permanente",f1_d:"Sen historial nin cookies persistentes. Ao pechar, a sesión desaparece sen rastro.",
+  f2_t:"Bloqueador de anuncios integrado",f2_d:"Máis de 40 dominios bloqueados automaticamente con contador en tempo real.",
+  f3_t:"Sen rastrexo",f3_d:"BOBO non envía telemetría nin crea perfís sobre ti.",
+  f4_t:"Busca privada",f4_d:"DuckDuckGo é o motor predeterminado — as buscas non se rexistran.",
+  f5_t:"49 idiomas",f5_d:"Interface dispoñible en 49 idiomas.",
+  f6_t:"Open-source",f6_d:"Código público e verificable en Python.",
+  privacy_h:"O que BOBO NON garda",privacy_intro:"A diferenza vese nos datos que NON se conservan.",
+  th_feature:"Datos",th_others:"Navegadores comúns",
+  r1:"Historial de navegación",r2:"Cookies ao pechar",r3:"Contrasinais e formularios",r4:"Perfilado publicitario",r5:"Telemetría ao provedor",
+  v_no:"Non",v_yes:"Si",
+  download_h:"Descargar agora",download_p:"BOBO Browser está dispoñible para Windows e Android.",
+  download_note:"Versión 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 ou 11 · 4 GB RAM · 500 MB",plat_and_req:"Android 7.0+ · ~1,5 MB",
+  android_note:"Versión 1.5 · APK · ~1,5 MB",badge_beta:"BETA",
+  install_h:"Como instalar Bobo Browser?",install_intro:"A instalación leva menos dun minuto.",
+  step1:"Descarga <strong>bobo_browser_1.5.apk</strong> premendo o botón verde.",
+  step2:"Abre o ficheiro descargado desde as notificacións ou <strong>Ficheiros / Descargas</strong>.",
+  step3:"Para <strong>«Fontes descoñecidas»</strong>:<span class=\"step-path\">Android 7–9: Configuración → Seguridade → Instalar desde fontes descoñecidas\nAndroid 10+: Configuración → Aplicacións → Permitir apps descoñecidas</span>",
+  step4:"Preme <strong>«Instalar»</strong>.",step5:"Feito! Goza da navegación privada.",
+  safety_text:"🛡️ <strong>Nota de seguridade:</strong> Bobo Browser é seguro. Sen virus, anuncios nin recollida de datos.",
+  footer_sub:"NAVEGADOR PRIVADO EUROPEO · SEN ANUNCIOS · SEN RASTREXO"
+};
+
+/* ===== ÍSLENSKA ===== */
+I18N.is = {
+  page_title:"BOBO Browser — Einkalæg vafraganga",
+  overlay_title:"Veldu tungumál",
+  overlay_sub:"Þú getur breytt þessu síðar",
+  overlay_cont:"Halda áfram",
+  hero_tagline:"Að vafra á netinu er einkaréttindi, ekki tækifæri til að þéna á notendum.",
+  hero_sub:"EINKALÆGUR VAFRI · WINDOWS & ANDROID · ÓKEYPIS · OPEN-SOURCE",
+  btn_download:"Hlaða niður fyrir Windows",hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"Hlaða niður fyrir Android",hero_note_android:"v1.5 · Android 7.0+ · APK · ~1,5 MB",
+  manifesto_h:"Vafri sem rekur þig ekki",
+  manifesto_p:"BOBO er byggt á einfaldri meginreglu: það sem þú leitar að og hvar þú vafrar tilheyrir þér. Engin saga, engar varanlegur vafrakökur, engin snið og engar auglýsingar.",
+  features_h:"Hvað gerir BOBO öðruvísi",
+  f1_t:"Varanlegur einkahamur",f1_d:"Engin saga eða varanlegur vafrakökur. Við lokun hverfur lotan án spors.",
+  f2_t:"Innbyggður auglýsingalokar",f2_d:"Yfir 40 auglýsinga- og rakningarlénum lokað sjálfkrafa.",
+  f3_t:"Engin rakning",f3_d:"BOBO sendir engar mælingar og byggir engar prófílar um þig.",
+  f4_t:"Einkalæg leit",f4_d:"DuckDuckGo er sjálfgefinn leitarvél — leitir eru ekki skráðar.",
+  f5_t:"49 tungumál",f5_d:"Viðmót í boði á 49 tungumálum.",
+  f6_t:"Open-source",f6_d:"Opinber, staðfæranlegur Python kóði.",
+  privacy_h:"Hvað BOBO geymir EKKI",privacy_intro:"Munurinn sést í gögnum sem eru EKKI geymd.",
+  th_feature:"Gögn",th_others:"Venjulegir vafrar",
+  r1:"Vafrasaga",r2:"Vafrakökur eftir lokun",r3:"Lykilorð og eyðublöð",r4:"Auglýsingasnið",r5:"Mælingar til söluaðila",
+  v_no:"Nei",v_yes:"Já",
+  download_h:"Hlaða niður núna",download_p:"BOBO Browser er í boði fyrir Windows og Android.",
+  download_note:"Útgáfa 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 eða 11 · 4 GB RAM · 500 MB",plat_and_req:"Android 7.0+ · ~1,5 MB",
+  android_note:"Útgáfa 1.5 · APK · ~1,5 MB",badge_beta:"BETA",
+  install_h:"Hvernig set ég upp Bobo Browser?",install_intro:"Uppsetning tekur minna en mínútu.",
+  step1:"Hlaðið niður <strong>bobo_browser_1.5.apk</strong> með því að ýta á græna hnappinn.",
+  step2:"Opnaðu skrána frá tilkynningastikunni eða úr <strong>Skrár / Niðurhal</strong>.",
+  step3:"Ef <strong>«Óþekkt uppruni»</strong> birtist:<span class=\"step-path\">Android 7–9: Stillingar → Öryggi → Leyfa óþekktan uppruna\nAndroid 10+: Stillingar → Forrit → Leyfa óþekkt forrit</span>",
+  step4:"Ýttu á <strong>«Setja upp»</strong>.",step5:"Búið! Njóttu einkalægrar vafragunar.",
+  safety_text:"🛡️ <strong>Öryggisatriði:</strong> Bobo Browser er örugg BoBo Soft forrit. Engir veirur, auglýsingar eða gagnasöfnun.",
+  footer_sub:"EVRÓPSKUR EINKALÆGUR VAFRI · ENGAR AUGLÝSINGAR · ENGIN RAKNING"
+};
+
+/* ===== SHQIP ===== */
+I18N.sq = {
+  page_title:"BOBO Browser — Shfletim privat",
+  overlay_title:"Zgjidh gjuhën tënde",
+  overlay_sub:"Mund ta ndryshosh më vonë",
+  overlay_cont:"Vazhdo",
+  hero_tagline:"Shfletimi i internetit është e drejtë private, jo mundësi për të monetizuar përdoruesit.",
+  hero_sub:"SHFLETUES PRIVAT · WINDOWS & ANDROID · FALAS · OPEN-SOURCE",
+  btn_download:"Shkarko për Windows",hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"Shkarko për Android",hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"Një shfletues që nuk ju gjurmon",
+  manifesto_p:"BOBO ndërtohet mbi një parim të thjeshtë: çfarë kërkoni dhe ku shfletoni ju përket juve. Pa histori, pa cookie të përhershme, pa profilizim dhe pa reklama.",
+  features_h:"Çfarë e bën BOBO të ndryshëm",
+  f1_t:"Modalitet privat i përhershëm",f1_d:"Pa histori dhe cookie të përhershme. Kur mbyllet, sesioni zhduket plotësisht.",
+  f2_t:"Bllokues reklamash i integruar",f2_d:"Mbi 40 domene reklamash të bllokuara automatikisht.",
+  f3_t:"Pa gjurmim",f3_d:"BOBO nuk dërgon telemetri dhe nuk ndërton profile për ju.",
+  f4_t:"Kërkim privat",f4_d:"DuckDuckGo është motori i paracaktuar — kërkimet nuk regjistrohen.",
+  f5_t:"49 gjuhë",f5_d:"Ndërfaqe e disponueshme në 49 gjuhë.",
+  f6_t:"Open-source",f6_d:"Kod publik dhe i verifikueshëm në Python.",
+  privacy_h:"Çfarë NUK ruan BOBO",privacy_intro:"Dallimi shihet në të dhënat që NUK ruhen.",
+  th_feature:"Të dhëna",th_others:"Shfletues të zakonshëm",
+  r1:"Histori shfletimi",r2:"Cookie pas mbylljes",r3:"Fjalëkalime dhe formularë",r4:"Profilizim reklamash",r5:"Telemetri te prodhuesi",
+  v_no:"Jo",v_yes:"Po",
+  download_h:"Shkarko tani",download_p:"BOBO Browser disponohet për Windows dhe Android.",
+  download_note:"Versioni 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 ose 11 · 4 GB RAM · 500 MB hapësirë",plat_and_req:"Android 7.0+ · ~1.5 MB",
+  android_note:"Versioni 1.5 · APK · ~1.5 MB",badge_beta:"BETA",
+  install_h:"Si të instaloj Bobo Browser?",install_intro:"Instalimi zgjat më pak se një minutë.",
+  step1:"Shkarko <strong>bobo_browser_1.5.apk</strong> duke shtypur butonin e gjelbër.",
+  step2:"Hap skedarin e shkarkuar nga njoftimet ose <strong>Skedarë / Shkarkime</strong>.",
+  step3:"Për <strong>«Burime të panjohura»</strong>:<span class=\"step-path\">Android 7–9: Cilësimet → Siguria → Lejo burime të panjohura\nAndroid 10+: Cilësimet → Aplikacionet → Lejo aplikacione të panjohura</span>",
+  step4:"Shtype <strong>«Instalo»</strong>.",step5:"Gati! Gëzo shfletimin privat.",
+  safety_text:"🛡️ <strong>Shënim sigurie:</strong> Bobo Browser është aplikacion i sigurt nga BoBo Soft. Pa viruse, reklama apo mbledhje të dhënash.",
+  footer_sub:"SHFLETUES PRIVAT EUROPIAN · PA REKLAMA · PA GJURMIM"
+};
+
+/* ===== ՀԱՅԵՐԵՆ ===== */
+I18N.hy = {
+  page_title:"BOBO Browser — Մասնավոր դիտարկում",
+  overlay_title:"Ընտրեք լեզուն",
+  overlay_sub:"Կարող եք փոխել ավելի ուշ",
+  overlay_cont:"Շարունակել",
+  hero_tagline:"Ինտերնետ դիտարկումը մասնավոր իրավունք է, ոչ թե օգտատերերի դրամայնացման հնարավորություն:",
+  hero_sub:"ՄԱՍՆԱՎՈՐ ԴԻՏԱՐԿԻՉ · WINDOWS & ANDROID · ԱՆՎՃԱՐ · OPEN-SOURCE",
+  btn_download:"Ներբեռնել Windows-ի համար",hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"Ներբեռնել Android-ի համար",hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 ՄԲ",
+  manifesto_h:"Դիտարկիչ, որը ձեզ չի հետևում",
+  manifesto_p:"BOBO-ն կառուցված է պարզ սկզբունքի վրա. ինչ փնտրում եք և որտեղ դիտարկում՝ ձեր սեփականն է: Առանց պատմության, մշտական քուքիների, պրոֆիլավորման և գովազդի:",
+  features_h:"Ինչն է BOBO-ն տարբեր",
+  f1_t:"Մշտական մասնավոր ռեժիմ",f1_d:"Պատմություն և մշտական քուքիներ չկան: Փակելիս ամեն ինչ ջնջվում է:",
+  f2_t:"Ներկառուցված գովազդի արգելափակում",f2_d:"40-ից ավելի դոմեն ավտոմատ արգելափակված:",
+  f3_t:"Հետևելու բացակայություն",f3_d:"BOBO հեռագրություն չի ուղարկում, ձեր մասին պրոֆիլ չի ստեղծում:",
+  f4_t:"Մասնավոր որոնում",f4_d:"DuckDuckGo կանխադրված շարժիչ է:",
+  f5_t:"49 լեզու",f5_d:"Ինտերֆեյս հասանելի 49 լեզվով:",
+  f6_t:"Open-source",f6_d:"Հրապարակային Python կոդ:",
+  privacy_h:"Ինչ ՉԻ ՊԱՀՈՒՄ BOBO-ն",privacy_intro:"Տարբերությունը տեսանելի է ՉՊԱՀՎՈֱՂ տվյալներում:",
+  th_feature:"Տվյալներ",th_others:"Սովորական դիտարկիչներ",
+  r1:"Դիտարկման պատմություն",r2:"Քուքիներ փակելուց հետո",r3:"Գաղտնաբառեր և ձևեր",r4:"Գովազդային պրոֆիլ",r5:"Հեռագրություն արտադրողին",
+  v_no:"Ոչ",v_yes:"Այո",
+  download_h:"Ներբեռնեք հիմա",download_p:"BOBO Browser հասանելի է Windows-ի և Android-ի համար:",
+  download_note:"Տարբերակ 1.5 · ~131 ՄԲ",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 կամ 11 · 4 ԳԲ RAM · 500 ՄԲ",plat_and_req:"Android 7.0+ · ~1.5 ՄԲ",
+  android_note:"Տ. 1.5 · APK · ~1.5 ՄԲ",badge_beta:"ԲԵՏԱ",
+  install_h:"Ինչպե՞ս տեղադրել Bobo Browser-ը",install_intro:"Տեղադրումը տևում է մեկ րոպեից պակաս:",
+  step1:"Ներբեռնեք <strong>bobo_browser_1.5.apk</strong>՝ սեղմելով կանաչ կոճակը:",
+  step2:"Բացեք ֆայլը ծանուցումների տողից կամ <strong>Ֆայլեր / Ներբեռնումներ</strong>-ից:",
+  step3:"<strong>«Անհայտ աղբյուրներ»</strong>-ի դեպքում:<span class=\"step-path\">Android 7–9: Կարգավորումներ → Անվտանգություն → Թույլ տալ անհայտ աղբյուրներ\nAndroid 10+: Կարգավորումներ → Հավելվածներ → Թույլ տալ անհայտ հավելվածներ</span>",
+  step4:"Սեղմեք <strong>«Տեղադրել»</strong>:",step5:"Պատրաստ! Վայելեք մասնավոր դիտարկումը:",
+  safety_text:"🛡️ <strong>Անվտանգության նշում:</strong> Bobo Browser BoBo Soft-ի անվտանգ հավելված է: Վիրուսներ, գովազդ կամ տվյալների հավաքագրում չկա:",
+  footer_sub:"ԵՎՐՈՊԱԿԱՆ ՄԱՍՆԱՎՈՐ ԴԻՏԱՐԿԻՉ · ԳՈՎԱԶԴ ՉԿԱ · ՀԵՏԵՎԵԼՈՒ ԲԱՑԱԿԱՅՈՒԹՅՈՒՆ"
+};
+
+/* ===== AZƏRBAYCAN ===== */
+I18N.az = {
+  page_title:"BOBO Browser — Şəxsi gəzmə",
+  overlay_title:"Dilinizi seçin",
+  overlay_sub:"Bunu daha sonra dəyişə bilərsiniz",
+  overlay_cont:"Davam et",
+  hero_tagline:"İnternetdə gəzmək şəxsi bir hüquqdur, istifadəçiləri pul qazanmaq üçün fürsət deyil.",
+  hero_sub:"ŞƏXSİ BRAUZER · WINDOWS & ANDROID · PULSİZ · OPEN-SOURCE",
+  btn_download:"Windows üçün yüklə",hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"Android üçün yüklə",hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"Sizi izləməyən bir brauzer",
+  manifesto_p:"BOBO sadə bir prinsip üzərində qurulub: axtardığınız və harada gəzdiyiniz sizə aiddir. Tarixçə yoxdur, daimi kukilər yoxdur, profil yaratma yoxdur, reklam yoxdur.",
+  features_h:"BOBO-nu fərqli edən nədir",
+  f1_t:"Daimi şəxsi rejim",f1_d:"Tarixçə və daimi kukilər yoxdur. Bağlandıqda sessiya tamamilə silinir.",
+  f2_t:"Daxili reklam bloklayıcı",f2_d:"40-dan çox reklam domeni avtomatik bloklanır.",
+  f3_t:"İzləmə yoxdur",f3_d:"BOBO telemetriya göndərmir, haqqınızda profil yaratmır.",
+  f4_t:"Şəxsi axtarış",f4_d:"DuckDuckGo standart mühərrikdir — axtarışlar qeydə alınmır.",
+  f5_t:"49 dil",f5_d:"Arayüz 49 dildə mövcuddur.",
+  f6_t:"Open-source",f6_d:"Açıq, yoxlanıla bilən Python kodu.",
+  privacy_h:"BOBO-nun SAXLAMADIQARI",privacy_intro:"Fərq SAXLANILMAYAN məlumatda görünür.",
+  th_feature:"Məlumat",th_others:"Adi brauzerlər",
+  r1:"Gəzmə tarixçəsi",r2:"Çerezlər bağlandıqdan sonra",r3:"Şifrələr və formalar",r4:"Reklam profilləşdirilməsi",r5:"Telemetriya satıcıya",
+  v_no:"Xeyr",v_yes:"Bəli",
+  download_h:"İndi yüklə",download_p:"BOBO Browser Windows və Android üçün mövcuddur.",
+  download_note:"Versiya 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 və ya 11 · 4 GB RAM · 500 MB",plat_and_req:"Android 7.0+ · ~1.5 MB",
+  android_note:"Versiya 1.5 · APK · ~1.5 MB",badge_beta:"BETA",
+  install_h:"Bobo Browser necə qurulur?",install_intro:"Quraşdırma bir dəqiqədən az çəkir.",
+  step1:"Yaşıl düyməyə basaraq <strong>bobo_browser_1.5.apk</strong>-ı yükləyin.",
+  step2:"Faylı bildirişlər panelindən və ya <strong>Fayllar / Yükləmələr</strong>-dən açın.",
+  step3:"<strong>«Naməlum mənbələr»</strong> üçün:<span class=\"step-path\">Android 7–9: Parametrlər → Təhlükəsizlik → Naməlum mənbələrə icazə verin\nAndroid 10+: Parametrlər → Proqramlar → Naməlum proqramlara icazə verin</span>",
+  step4:"<strong>«Quraşdır»</strong> düyməsini basın.",step5:"Hazır! Şəxsi gəzmənin dadını çıxarın.",
+  safety_text:"🛡️ <strong>Təhlükəsizlik qeydi:</strong> Bobo Browser BoBo Soft-un təhlükəsiz proqramıdır. Virus, reklam və məlumat toplanması yoxdur.",
+  footer_sub:"AVROPA ŞƏXSİ BRAUZERI · REKLAM YOX · İZLƏMƏ YOX"
+};
+
+/* ===== ქართული ===== */
+I18N.ka = {
+  page_title:"BOBO Browser — პირადი დათვალიერება",
+  overlay_title:"აირჩიეთ ენა",
+  overlay_sub:"მოგვიანებით შეგიძლიათ შეცვალოთ",
+  overlay_cont:"გაგრძელება",
+  hero_tagline:"ინტერნეტში სერფინგი პირადი უფლებაა, არა მომხმარებლების მონეტიზაციის შესაძლებლობა.",
+  hero_sub:"პირადი ბრაუზერი · WINDOWS & ANDROID · უფასო · OPEN-SOURCE",
+  btn_download:"ჩამოტვირთვა Windows-ისთვის",hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"ჩამოტვირთვა Android-ისთვის",hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"ბრაუზერი, რომელიც თქვენ არ გყვება",
+  manifesto_p:"BOBO მარტივ პრინციპზეა აგებული: რასაც ეძებთ და სად დათვალიერებთ, თქვენი საკუთრებაა. ისტორია არ არის, მუდმივი ქუქი-ფაილები არ არის, პროფილირება არ არის, რეკლამა არ არის.",
+  features_h:"რა ხდის BOBO-ს განსხვავებულს",
+  f1_t:"მუდმივი პირადი რეჟიმი",f1_d:"ისტორია და მუდმივი ქუქი-ფაილები არ არის.",
+  f2_t:"ჩაშენებული რეკლამის ბლოკატორი",f2_d:"40-ზე მეტი სარეკლამო დომენი ავტომატურად დაბლოკილია.",
+  f3_t:"თვალთვალი არ არის",f3_d:"BOBO ტელემეტრიას არ გზავნის, პროფილებს არ ქმნის.",
+  f4_t:"პირადი ძიება",f4_d:"DuckDuckGo ნაგულისხმევი ძრავაა.",
+  f5_t:"49 ენა",f5_d:"ინტერფეისი 49 ენაზეა ხელმისაწვდომი.",
+  f6_t:"Open-source",f6_d:"საჯარო Python კოდი.",
+  privacy_h:"რას არ ინახავს BOBO",privacy_intro:"განსხვავება ᲐᲠ შენახულ მონაცემებში ჩანს.",
+  th_feature:"მონაცემები",th_others:"ჩვეულებრივი ბრაუზერები",
+  r1:"დათვალიერების ისტორია",r2:"ქუქი-ფაილები დახურვის შემდეგ",r3:"პაროლები და ფორმები",r4:"სარეკლამო პროფილირება",r5:"ტელემეტრია მწარმოებლისთვის",
+  v_no:"არა",v_yes:"კი",
+  download_h:"ჩამოტვირთეთ ახლა",download_p:"BOBO Browser ხელმისაწვდომია Windows-ისა და Android-ისთვის.",
+  download_note:"ვერსია 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 ან 11 · 4 GB RAM · 500 MB",plat_and_req:"Android 7.0+ · ~1.5 MB",
+  android_note:"ვ. 1.5 · APK · ~1.5 MB",badge_beta:"BETA",
+  install_h:"როგორ დავაინსტალირო Bobo Browser?",install_intro:"ინსტალაცია ერთ წუთზე ნაკლებს გრძელდება.",
+  step1:"ჩამოტვირთეთ <strong>bobo_browser_1.5.apk</strong> მწვანე ღილაკზე დაჭერით.",
+  step2:"გახსენით ფაილი შეტყობინებების ზოლიდან ან <strong>ფაილები / ჩამოტვირთვები</strong>-დან.",
+  step3:"<strong>«უცნობი წყაროებისთვის»</strong>:<span class=\"step-path\">Android 7–9: პარამეტრები → უსაფრთხოება → უცნობი წყაროების დაშვება\nAndroid 10+: პარამეტრები → აპლიკაციები → უცნობი აპლიკაციების დაშვება</span>",
+  step4:"შეეხეთ <strong>«ინსტალაცია»</strong>-ს.",step5:"მზადაა! ისიამოვნეთ პირადი დათვალიერებით.",
+  safety_text:"🛡️ <strong>უსაფრთხოების შენიშვნა:</strong> Bobo Browser BoBo Soft-ის უსაფრთხო აპლიკაციაა. ვირუსები, რეკლამა ან მონაცემების შეგროვება არ არის.",
+  footer_sub:"ევროპული პირადი ბრაუზერი · რეკლამა არ არის · თვალთვალი არ არის"
+};
+
+/* ===== GAEILGE ===== */
+I18N.ga = {
+  page_title:"BOBO Browser — Brabhsáil phríobháideach",
+  overlay_title:"Roghnaigh do theanga",
+  overlay_sub:"Is féidir leat é seo a athrú níos déanaí",
+  overlay_cont:"Lean ar aghaidh",
+  hero_tagline:"Is ceart príobháideach é brabhsáil ar an idirlíon, ní deis chun airgead a dhéanamh as úsáideoirí.",
+  hero_sub:"BRABHSÁLAÍ PRÍOBHÁIDEACH · WINDOWS & ANDROID · SAOR IN AISCE · OPEN-SOURCE",
+  btn_download:"Íoslódáil do Windows",hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"Íoslódáil do Android",hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"Brabhsálaí nach leanann tú",
+  manifesto_p:"Tá BOBO tógtha ar phrionsabal simplí: is leatsa atá tú á chuardach agus cá brabhsálann tú. Gan stair, gan fianáin leanúnacha, gan próifíliú agus gan fógraí.",
+  features_h:"Cad a dhéanann BOBO difriúil",
+  f1_t:"Mód príobháideach buan",f1_d:"Gan stair ná fianáin leanúnacha. Ar dhúnadh, imíonn an seisiún gan lorg.",
+  f2_t:"Bacadh fógraí ionsuite",f2_d:"Os cionn 40 fearann fógraíochta blocáilte go huathoibríoch.",
+  f3_t:"Gan rianú",f3_d:"Ní sheolann BOBO teileaméadracht agus ní thógann sé próifílí fút.",
+  f4_t:"Cuardach príobháideach",f4_d:"Is é DuckDuckGo an t-inneall réamhshocraithe — ní logáiltear cuardaigh.",
+  f5_t:"49 teanga",f5_d:"Comhéadan ar fáil i 49 teanga.",
+  f6_t:"Open-source",f6_d:"Cód poiblí Python.",
+  privacy_h:"Cad nach stórálann BOBO",privacy_intro:"Feictear an difríocht i sonraí nach gCOIMEÁDTAR.",
+  th_feature:"Sonraí",th_others:"Gnáthbhrabhsálaithe",
+  r1:"Stair bhrabhsála",r2:"Fianáin tar éis dúnta",r3:"Pasfhocail agus foirmeacha",r4:"Próifíliú fógraíochta",r5:"Teileaméadracht don díoltóir",
+  v_no:"Níl",v_yes:"Tá",
+  download_h:"Íoslódáil anois",download_p:"Tá BOBO Browser ar fáil do Windows agus Android.",
+  download_note:"Leagan 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 nó 11 · 4 GB RAM · 500 MB",plat_and_req:"Android 7.0+ · ~1.5 MB",
+  android_note:"Leagan 1.5 · APK · ~1.5 MB",badge_beta:"BÉITE",
+  install_h:"Conas Bobo Browser a shuiteáil?",install_intro:"Tógann an suiteáil níos lú ná nóiméad.",
+  step1:"Íoslódáil <strong>bobo_browser_1.5.apk</strong> trí bhrú ar an gcnaipe glas.",
+  step2:"Oscail an comhad ón mbarra fógraí nó ón aip <strong>Comhaid / Íoslódálacha</strong>.",
+  step3:"Má fheiceann tú <strong>«Foinsí anaithnid»</strong>:<span class=\"step-path\">Android 7–9: Socruithe → Slándáil → Lig suiteáil ó fhoinsí anaithnide\nAndroid 10+: Socruithe → Aipeanna → Lig aipeanna anaithnide</span>",
+  step4:"Brúigh <strong>«Suiteáil»</strong>.",step5:"Déanta! Bain taitneamh as brabhsáil phríobháideach.",
+  safety_text:"🛡️ <strong>Nóta sábháilteachta:</strong> Is feidhmchlár slán é Bobo Browser ó BoBo Soft. Gan víris, fógraí nó bailiú sonraí.",
+  footer_sub:"BRABHSÁLAÍ PRÍOBHÁIDEACH EORPACH · GAN FÓGRAÍ · GAN RIANÚ"
+};
+
+/* ===== MALTI ===== */
+I18N.mt = {
+  page_title:"BOBO Browser — Brawsing privat",
+  overlay_title:"Agħżel il-lingwa tiegħek",
+  overlay_sub:"Tista' tbiddel dan aktar tard",
+  overlay_cont:"Ikompli",
+  hero_tagline:"Il-brawsing tal-internet huwa dritt privat, mhux opportunità biex timmonjetizza lill-utenti.",
+  hero_sub:"BRAWSER PRIVAT · WINDOWS & ANDROID · B'XEJN · OPEN-SOURCE",
+  btn_download:"Niżżel għal Windows",hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"Niżżel għal Android",hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"Brawser li ma jsegwikx",
+  manifesto_p:"BOBO huwa mibni fuq prinċipju sempliċi: dak li tfittex u fejn tbrawsja jappartjeni lilek. Ebda storja, ebda cookies persistenti, ebda profiling u ebda reklami.",
+  features_h:"X'jagħmel lil BOBO differenti",
+  f1_t:"Modalità privata permanenti",f1_d:"Ebda storja u cookies persistenti. Meta tagħlaq, is-sessjoni tgħib kompletament.",
+  f2_t:"Imblukkar ta' reklami integrat",f2_d:"Aktar minn 40 dominju ta' reklami mblukkata awtomatikament.",
+  f3_t:"Ebda tracking",f3_d:"BOBO ma jibgħatx telemetrija u ma jibniex profili dwark.",
+  f4_t:"Tiftix privat",f4_d:"DuckDuckGo huwa l-magna default — it-tiftix ma jiġix irreġistrat.",
+  f5_t:"49 lingwa",f5_d:"Interfaċċja disponibbli f'49 lingwa.",
+  f6_t:"Open-source",f6_d:"Kodiċi Python pubbliku u verifikabbli.",
+  privacy_h:"X'ma jaħżenx BOBO",privacy_intro:"Id-differenza tidher fid-data li MA tiġix miżmuma.",
+  th_feature:"Data",th_others:"Brawsers ordinarji",
+  r1:"Storja tal-brawsing",r2:"Cookies wara l-għeluq",r3:"Passwords u formoli",r4:"Profiling tar-reklami",r5:"Telemetrija lill-fornitur",
+  v_no:"Le",v_yes:"Iva",
+  download_h:"Niżżel issa",download_p:"BOBO Browser huwa disponibbli għal Windows u Android.",
+  download_note:"Verżjoni 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 jew 11 · 4 GB RAM · 500 MB",plat_and_req:"Android 7.0+ · ~1.5 MB",
+  android_note:"Verżjoni 1.5 · APK · ~1.5 MB",badge_beta:"BETA",
+  install_h:"Kif tinstalla Bobo Browser?",install_intro:"L-installazzjoni tieħu inqas minn minuta.",
+  step1:"Niżżel <strong>bobo_browser_1.5.apk</strong> billi tagħfas il-buttuna ħadra.",
+  step2:"Iftaħ il-fajl mill-barra tan-notifiki jew mill-applikazzjoni <strong>Fajls / Downloads</strong>.",
+  step3:"Għal <strong>«Sorsi mhux magħrufa»</strong>:<span class=\"step-path\">Android 7–9: Settings → Sigurtà → Permetti sorsi mhux magħrufa\nAndroid 10+: Settings → Apps → Permetti apps mhux magħrufa</span>",
+  step4:"Agħfas <strong>«Installa»</strong>.",step5:"Lest! Gawdi l-brawsing privat.",
+  safety_text:"🛡️ <strong>Nota ta' sigurtà:</strong> Bobo Browser huwa applikazzjoni sikura ta' BoBo Soft. Ebda viruses, reklami jew ġbir ta' data.",
+  footer_sub:"BRAWSER PRIVAT EWROPEW · EBDA REKLAMI · EBDA TRACKING"
+};
+
+/* ===== عربي (RTL) ===== */
+I18N.ar = {
+  page_title:"BOBO Browser — تصفح خاص",
+  overlay_title:"اختر لغتك",
+  overlay_sub:"يمكنك تغيير ذلك لاحقاً",
+  overlay_cont:"متابعة",
+  hero_tagline:"تصفح الإنترنت حق خاص، وليس فرصة لجني الأموال من المستخدمين.",
+  hero_sub:"متصفح خاص · ويندوز وأندرويد · مجاني · مفتوح المصدر",
+  btn_download:"تحميل لـ Windows",
+  hero_note:"الإصدار 1.5 · Windows 10/11 · مثبّت .exe",
+  btn_download_android:"تحميل لـ Android",
+  hero_note_android:"الإصدار 1.5 · Android 7.0+ · APK · ~1.5 ميغابايت",
+  manifesto_h:"متصفح لا يتتبعك",
+  manifesto_p:"يُبنى BOBO على مبدأ بسيط: ما تبحث عنه وأين تتصفح يخصّك وحدك. لا سجلّ، لا ملفات تعريف ارتباط دائمة، لا تحديد هوية، لا إعلانات. تُمسح جلستك بالكامل عند إغلاق المتصفح — في كل مرة.",
+  features_h:"ما الذي يجعل BOBO مختلفاً",
+  f1_t:"وضع خاص دائم",
+  f1_d:"لا سجل ولا ملفات تعريف دائمة. عند الإغلاق، تختفي الجلسة كلياً دون أثر.",
+  f2_t:"حظر إعلانات مدمج",
+  f2_d:"أكثر من 40 نطاقاً إعلانياً وتتبعياً محجوباً تلقائياً، مع عداد فوري.",
+  f3_t:"لا تتبع",
+  f3_d:"لا يُرسل BOBO بيانات استخدام ولا يبني ملفات تعريف عنك.",
+  f4_t:"بحث خاص",
+  f4_d:"DuckDuckGo هو محرك البحث الافتراضي — لا تُسجَّل عمليات بحثك. يمكنك اختيار Brave أو Google أو Bing.",
+  f5_t:"49 لغة",
+  f5_d:"الواجهة متاحة بـ 49 لغة — أوروبية وإقليمية ودولية.",
+  f6_t:"مفتوح المصدر",
+  f6_d:"كود Python عام وقابل للتحقق. لا شيء مخفي.",
+  privacy_h:"ما لا يحفظه BOBO",
+  privacy_intro:"يظهر الفرق بين متصفح خاص وعادي في البيانات التي لا تُحفَظ.",
+  th_feature:"البيانات",
+  th_others:"المتصفحات العادية",
+  r1:"سجل التصفح",
+  r2:"ملفات الارتباط بعد الإغلاق",
+  r3:"كلمات المرور والنماذج",
+  r4:"تحديد الهوية الإعلانية",
+  r5:"بيانات الاستخدام للمطوّر",
+  v_no:"لا",
+  v_yes:"نعم",
+  download_h:"تحميل الآن",
+  download_p:"BOBO Browser متاح لـ Windows وAndroid. اختر منصتك.",
+  download_note:"الإصدار 1.5 · مثبّت Windows · ~131 ميغابايت",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 أو 11 · 4 غيغابايت RAM على الأقل · 500 ميغابايت مساحة حرة",
+  plat_and_req:"Android 7.0+ · أي هاتف أو جهاز لوحي · ~1.5 ميغابايت",
+  android_note:"الإصدار 1.5 · APK مباشر · ~1.5 ميغابايت",
+  badge_beta:"تجريبي",
+  install_h:"كيف تثبّت Bobo Browser؟",
+  install_intro:"التثبيت يستغرق أقل من دقيقة. اتبع الخطوات أدناه.",
+  step1:"حمّل ملف <strong>bobo_browser_1.5.apk</strong> على جهاز Android بالضغط على الزر الأخضر أعلاه.",
+  step2:"افتح الملف المُحمَّل من شريط الإشعارات أو تطبيق <strong>الملفات / التنزيلات</strong>.",
+  step3:"إذا ظهرت رسالة <strong>«مصادر غير معروفة»</strong>، فعّل الإذن:<span class=\"step-path\">Android 7–9: الإعدادات ← الأمان ← تثبيت من مصادر غير معروفة\nAndroid 10+: الإعدادات ← التطبيقات ← المتصفح المستخدم ← السماح بتثبيت تطبيقات غير معروفة</span>",
+  step4:"اضغط <strong>«تثبيت»</strong> وانتظر ثوانٍ.",
+  step5:"تم! افتح <strong>Bobo Browser</strong> وتمتع بالتصفح الخاص.",
+  safety_text:"🛡️ <strong>ملاحظة أمنية:</strong> Bobo Browser تطبيق آمن 100% من BoBo Soft. لا فيروسات ولا إعلانات ولا جمع بيانات. أي تحذير من برنامج مكافحة الفيروسات هو تنبيه عام للتطبيقات خارج Google Play — لا خطر حقيقي.",
+  footer_sub:"متصفح خاص أوروبي · بدون إعلانات · بدون تتبع"
+};
+
+/* ===== עברית (RTL) ===== */
+I18N.he = {
+  page_title:"BOBO Browser — גלישה פרטית",
+  overlay_title:"בחר את שפתך",
+  overlay_sub:"תוכל לשנות זאת מאוחר יותר",
+  overlay_cont:"המשך",
+  hero_tagline:"גלישה באינטרנט היא זכות פרטית, לא הזדמנות לייצר הכנסות ממשתמשים.",
+  hero_sub:"דפדפן פרטי · WINDOWS ואנדרואיד · חינמי · קוד פתוח",
+  btn_download:"הורד ל-Windows",
+  hero_note:"גרסה 1.5 · Windows 10/11 · מתקין .exe",
+  btn_download_android:"הורד ל-Android",
+  hero_note_android:"גרסה 1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"דפדפן שלא עוקב אחריך",
+  manifesto_p:"BOBO בנוי על עיקרון פשוט: מה שאתה מחפש והיכן אתה גולש שייך לך. ללא היסטוריה, ללא עוגיות קבועות, ללא פרופיל ועם פרסומות. הסשן שלך נמחק לחלוטין בעת סגירת הדפדפן — בכל פעם.",
+  features_h:"מה הופך את BOBO לשונה",
+  f1_t:"מצב פרטי קבוע",
+  f1_d:"ללא היסטוריה ועוגיות קבועות. בסגירה, הסשן נעלם ללא עקבות.",
+  f2_t:"חסימת פרסומות מובנית",
+  f2_d:"מעל 40 דומיינים פרסומיים ומעקב חסומים אוטומטית, עם מונה בזמן אמת.",
+  f3_t:"ללא מעקב",
+  f3_d:"BOBO לא שולח טלמטריה ולא בונה פרופיל עליך.",
+  f4_t:"חיפוש פרטי",
+  f4_d:"DuckDuckGo הוא מנוע ברירת המחדל — החיפושים שלך לא נרשמים.",
+  f5_t:"49 שפות",
+  f5_d:"ממשק זמין ב-49 שפות — אירופאיות, אזוריות ובינלאומיות.",
+  f6_t:"קוד פתוח",
+  f6_d:"קוד Python ציבורי וניתן לאימות. אין שום דבר מוסתר.",
+  privacy_h:"מה BOBO לא שומר",
+  privacy_intro:"ההבדל בין דפדפן פרטי לרגיל נראה בנתונים שלא נשמרים.",
+  th_feature:"נתונים",
+  th_others:"דפדפנים רגילים",
+  r1:"היסטוריית גלישה",
+  r2:"עוגיות לאחר סגירה",
+  r3:"סיסמאות וטפסים",
+  r4:"פרופיל פרסומי",
+  r5:"טלמטריה לספק",
+  v_no:"לא",
+  v_yes:"כן",
+  download_h:"הורד עכשיו",
+  download_p:"BOBO Browser זמין ל-Windows ולאנדרואיד. בחר את הפלטפורמה שלך.",
+  download_note:"גרסה 1.5 · מתקין Windows · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 או 11 · לפחות 4 GB RAM · 500 MB מקום פנוי",
+  plat_and_req:"Android 7.0+ · כל טלפון או טאבלט אנדרואיד · ~1.5 MB",
+  android_note:"גרסה 1.5 · APK ישיר · ~1.5 MB",
+  badge_beta:"בטא",
+  install_h:"כיצד להתקין את Bobo Browser?",
+  install_intro:"ההתקנה אורכת פחות מדקה. עקוב אחר השלבים הבאים.",
+  step1:"הורד את הקובץ <strong>bobo_browser_1.5.apk</strong> למכשיר Android שלך על ידי לחיצה על הכפתור הירוק למעלה.",
+  step2:"פתח את הקובץ שהורד מסרגל ההתראות או מאפליקציית <strong>קבצים / הורדות</strong>.",
+  step3:"אם מופיעה ההודעה <strong>«מקורות לא ידועים»</strong>, אפשר את ההרשאה:<span class=\"step-path\">Android 7–9: הגדרות ← אבטחה ← התקנה ממקורות לא ידועים\nAndroid 10+: הגדרות ← אפליקציות ← הדפדפן שממנו הורדת ← אפשר התקנת אפליקציות לא ידועות</span>",
+  step4:"הקש על <strong>«התקן»</strong> וחכה כמה שניות.",
+  step5:"סיום! פתח את <strong>Bobo Browser</strong> מרשימת האפליקציות שלך ותהנה מגלישה פרטית.",
+  safety_text:"🛡️ <strong>הערת אבטחה:</strong> Bobo Browser הוא אפליקציה 100% בטוחה שפותחה על ידי BoBo Soft. אין וירוסים, פרסומות או איסוף נתונים. אזהרת האנטי-וירוס היא התראה כללית לאפליקציות מחוץ ל-Google Play — ללא סכנה אמיתית.",
+  footer_sub:"דפדפן פרטי אירופאי · ללא פרסומות · ללא מעקב"
+};
+
+/* ===== हिन्दी ===== */
+I18N.hi = {
+  page_title:"BOBO Browser — निजी ब्राउज़िंग",
+  overlay_title:"अपनी भाषा चुनें",
+  overlay_sub:"आप इसे बाद में बदल सकते हैं",
+  overlay_cont:"जारी रखें",
+  hero_tagline:"इंटरनेट ब्राउज़ करना एक निजी अधिकार है, उपयोगकर्ताओं से कमाई का अवसर नहीं।",
+  hero_sub:"निजी ब्राउज़र · WINDOWS & ANDROID · मुफ़्त · OPEN-SOURCE",
+  btn_download:"Windows के लिए डाउनलोड करें",
+  hero_note:"v1.5 · Windows 10/11 · .exe इंस्टॉलर",
+  btn_download_android:"Android के लिए डाउनलोड करें",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"एक ब्राउज़र जो आपको ट्रैक नहीं करता",
+  manifesto_p:"BOBO एक सरल सिद्धांत पर बना है: आप क्या खोजते हैं और कहाँ ब्राउज़ करते हैं — यह आपका है। कोई इतिहास नहीं, कोई स्थायी कुकीज़ नहीं, कोई प्रोफ़ाइलिंग नहीं, कोई विज्ञापन नहीं। ब्राउज़र बंद करने पर आपका सत्र पूरी तरह मिट जाता है — हर बार।",
+  features_h:"BOBO को क्या अलग बनाता है",
+  f1_t:"स्थायी निजी मोड",
+  f1_d:"कोई इतिहास और स्थायी कुकीज़ नहीं। बंद करने पर सत्र बिना किसी निशान के मिट जाता है।",
+  f2_t:"अंतर्निहित विज्ञापन अवरोधन",
+  f2_d:"40 से अधिक विज्ञापन और ट्रैकिंग डोमेन स्वचालित रूप से अवरुद्ध, रीयल-टाइम काउंटर के साथ।",
+  f3_t:"कोई ट्रैकिंग नहीं",
+  f3_d:"BOBO कोई टेलीमेट्री नहीं भेजता और आपके बारे में कोई प्रोफ़ाइल नहीं बनाता।",
+  f4_t:"निजी खोज",
+  f4_d:"DuckDuckGo डिफ़ॉल्ट इंजन है — आपकी खोजें लॉग नहीं होतीं।",
+  f5_t:"49 भाषाएँ",
+  f5_d:"इंटरफ़ेस 49 भाषाओं में उपलब्ध — यूरोपीय, क्षेत्रीय और अंतर्राष्ट्रीय।",
+  f6_t:"Open-source",
+  f6_d:"Python में लिखा सार्वजनिक, सत्यापन योग्य कोड।",
+  privacy_h:"BOBO क्या नहीं सहेजता",
+  privacy_intro:"निजी और सामान्य ब्राउज़र का अंतर उन डेटा में दिखता है जो नहीं रखे जाते।",
+  th_feature:"डेटा",
+  th_others:"सामान्य ब्राउज़र",
+  r1:"ब्राउज़िंग इतिहास",
+  r2:"बंद करने के बाद कुकीज़",
+  r3:"पासवर्ड और फ़ॉर्म",
+  r4:"विज्ञापन प्रोफ़ाइलिंग",
+  r5:"विक्रेता को टेलीमेट्री",
+  v_no:"नहीं",
+  v_yes:"हाँ",
+  download_h:"अभी डाउनलोड करें",
+  download_p:"BOBO Browser Windows और Android के लिए उपलब्ध है।",
+  download_note:"संस्करण 1.5 · Windows इंस्टॉलर · ~131 MB",
+  plat_win_title:"Windows",
+  plat_win_req:"Windows 10 या 11 · कम से कम 4 GB RAM · 500 MB खाली स्थान",
+  plat_and_req:"Android 7.0+ · कोई भी Android फ़ोन या टैबलेट · ~1.5 MB",
+  android_note:"संस्करण 1.5 · APK · ~1.5 MB",
+  badge_beta:"बीटा",
+  install_h:"Bobo Browser कैसे इंस्टॉल करें?",
+  install_intro:"इंस्टॉलेशन एक मिनट से कम समय लेता है।",
+  step1:"ऊपर दिए हरे बटन पर टैप करके <strong>bobo_browser_1.5.apk</strong> डाउनलोड करें।",
+  step2:"नोटिफिकेशन बार या <strong>फ़ाइलें / डाउनलोड</strong> ऐप से डाउनलोड की गई फ़ाइल खोलें।",
+  step3:"यदि <strong>«अज्ञात स्रोत»</strong> संदेश दिखे, अनुमति दें:<span class=\"step-path\">Android 7–9: सेटिंग्स → सुरक्षा → अज्ञात स्रोतों से इंस्टॉल करने की अनुमति दें\nAndroid 10+: सेटिंग्स → ऐप्स → (उपयोग किया ब्राउज़र) → अज्ञात ऐप्स इंस्टॉल करने दें</span>",
+  step4:"<strong>«इंस्टॉल करें»</strong> पर टैप करें और कुछ सेकंड प्रतीक्षा करें।",
+  step5:"हो गया! <strong>Bobo Browser</strong> खोलें और निजी ब्राउज़िंग का आनंद लें।",
+  safety_text:"🛡️ <strong>सुरक्षा नोट:</strong> Bobo Browser BoBo Soft द्वारा विकसित 100% सुरक्षित ऐप है। कोई वायरस, विज्ञापन या डेटा संग्रह नहीं। एंटीवायरस चेतावनी Google Play के बाहर ऐप्स के लिए एक सामान्य अलर्ट है — कोई वास्तविक खतरा नहीं।",
+  footer_sub:"यूरोपीय निजी ब्राउज़र · विज्ञापन नहीं · ट्रैकिंग नहीं"
+};
+
+/* ===== বাংলা ===== */
+I18N.bn = {
+  page_title:"BOBO Browser — ব্যক্তিগত ব্রাউজিং",
+  overlay_title:"আপনার ভাষা বেছে নিন",
+  overlay_sub:"আপনি এটি পরে পরিবর্তন করতে পারবেন",
+  overlay_cont:"চালিয়ে যান",
+  hero_tagline:"ইন্টারনেট ব্রাউজ করা একটি ব্যক্তিগত অধিকার, ব্যবহারকারীদের থেকে অর্থ উপার্জনের সুযোগ নয়।",
+  hero_sub:"প্রাইভেট ব্রাউজার · WINDOWS & ANDROID · বিনামূল্যে · OPEN-SOURCE",
+  btn_download:"Windows এর জন্য ডাউনলোড করুন",
+  hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"Android এর জন্য ডাউনলোড করুন",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"একটি ব্রাউজার যা আপনাকে ট্র্যাক করে না",
+  manifesto_p:"BOBO একটি সরল নীতিতে তৈরি: আপনি কী খোঁজেন এবং কোথায় ব্রাউজ করেন তা আপনার। কোনো ইতিহাস নেই, স্থায়ী কুকি নেই, প্রোফাইলিং নেই, বিজ্ঞাপন নেই।",
+  features_h:"BOBO কে আলাদা করে কী",
+  f1_t:"স্থায়ী প্রাইভেট মোড",f1_d:"কোনো ইতিহাস বা স্থায়ী কুকি নেই। বন্ধ করলে সেশন সম্পূর্ণ মুছে যায়।",
+  f2_t:"অন্তর্নির্মিত বিজ্ঞাপন ব্লকার",f2_d:"৪০টিরও বেশি ডোমেন স্বয়ংক্রিয়ভাবে ব্লক।",
+  f3_t:"কোনো ট্র্যাকিং নেই",f3_d:"BOBO টেলিমেট্রি পাঠায় না এবং প্রোফাইল তৈরি করে না।",
+  f4_t:"প্রাইভেট সার্চ",f4_d:"DuckDuckGo ডিফল্ট সার্চ ইঞ্জিন।",
+  f5_t:"৪৯টি ভাষা",f5_d:"৪৯টি ভাষায় ইন্টারফেস উপলব্ধ।",
+  f6_t:"Open-source",f6_d:"Python এ লেখা সর্বজনীন কোড।",
+  privacy_h:"BOBO কী সংরক্ষণ করে না",privacy_intro:"পার্থক্য দেখা যায় যে ডেটা রাখা হয় না তাতে।",
+  th_feature:"ডেটা",th_others:"সাধারণ ব্রাউজার",
+  r1:"ব্রাউজিং ইতিহাস",r2:"বন্ধের পরে কুকি",r3:"পাসওয়ার্ড ও ফর্ম",r4:"বিজ্ঞাপন প্রোফাইলিং",r5:"বিক্রেতাকে টেলিমেট্রি",
+  v_no:"না",v_yes:"হ্যাঁ",
+  download_h:"এখনই ডাউনলোড করুন",download_p:"BOBO Browser Windows ও Android এর জন্য উপলব্ধ।",
+  download_note:"সংস্করণ 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 বা 11 · ৪ GB RAM · ৫০০ MB",plat_and_req:"Android 7.0+ · ~1.5 MB",
+  android_note:"সংস্করণ 1.5 · APK · ~1.5 MB",badge_beta:"বেটা",
+  install_h:"Bobo Browser কীভাবে ইনস্টল করবেন?",install_intro:"ইনস্টলেশন এক মিনিটের কম সময় নেয়।",
+  step1:"সবুজ বোতামে ট্যাপ করে <strong>bobo_browser_1.5.apk</strong> ডাউনলোড করুন।",
+  step2:"নোটিফিকেশন বার বা <strong>ফাইল / ডাউনলোড</strong> অ্যাপ থেকে ফাইলটি খুলুন।",
+  step3:"<strong>«অজানা উৎস»</strong> বার্তার জন্য:<span class=\"step-path\">Android 7–9: সেটিংস → নিরাপত্তা → অজানা উৎস থেকে ইনস্টল করার অনুমতি দিন\nAndroid 10+: সেটিংস → অ্যাপস → অজানা অ্যাপ ইনস্টল করার অনুমতি দিন</span>",
+  step4:"<strong>«ইনস্টল করুন»</strong> ট্যাপ করুন।",step5:"সম্পন্ন! প্রাইভেট ব্রাউজিং উপভোগ করুন।",
+  safety_text:"🛡️ <strong>নিরাপত্তা নোট:</strong> Bobo Browser BoBo Soft এর নিরাপদ অ্যাপ। কোনো ভাইরাস, বিজ্ঞাপন বা ডেটা সংগ্রহ নেই।",
+  footer_sub:"ইউরোপীয় প্রাইভেট ব্রাউজার · বিজ্ঞাপন নেই · ট্র্যাকিং নেই"
+};
+
+/* ===== தமிழ் ===== */
+I18N.ta = {
+  page_title:"BOBO Browser — தனியுரிமை உலாவல்",
+  overlay_title:"உங்கள் மொழியை தேர்வு செய்யுங்கள்",
+  overlay_sub:"நீங்கள் இதை பின்னர் மாற்றலாம்",
+  overlay_cont:"தொடரவும்",
+  hero_tagline:"இணையத்தில் உலாவுவது தனிப்பட்ட உரிமை, பயனர்களை பணமாக்குவதற்கான வாய்ப்பல்ல.",
+  hero_sub:"தனியுரிமை உலாவி · WINDOWS & ANDROID · இலவசம் · OPEN-SOURCE",
+  btn_download:"Windows க்கு பதிவிறக்கு",
+  hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"Android க்கு பதிவிறக்கு",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"உங்களை கண்காணிக்காத உலாவி",
+  manifesto_p:"BOBO ஒரு எளிய கொள்கையின் மீது கட்டப்பட்டுள்ளது: நீங்கள் தேடுவது மற்றும் எங்கே உலாவுகிறீர்கள் என்பது உங்களுடையது. வரலாறு இல்லை, நிரந்தர குக்கீகள் இல்லை, சுயவிவரம் இல்லை, விளம்பரங்கள் இல்லை.",
+  features_h:"BOBO ஐ வேறுபடுத்துவது என்ன",
+  f1_t:"நிரந்தர தனியுரிமை பயன்முறை",f1_d:"வரலாறு மற்றும் நிரந்தர குக்கீகள் இல்லை.",
+  f2_t:"உள்ளமைக்கப்பட்ட விளம்பர தடுப்பு",f2_d:"40க்கும் மேற்பட்ட டொமைன்கள் தானாகவே தடுக்கப்படுகின்றன.",
+  f3_t:"கண்காணிப்பு இல்லை",f3_d:"BOBO தொலைமிதி அனுப்பாது, உங்கள் சுயவிவரம் உருவாக்காது.",
+  f4_t:"தனியுரிமை தேடல்",f4_d:"DuckDuckGo இயல்புநிலை தேடுபொறி.",
+  f5_t:"49 மொழிகள்",f5_d:"இடைமுகம் 49 மொழிகளில் கிடைக்கிறது.",
+  f6_t:"Open-source",f6_d:"பொதுவான Python குறியீடு.",
+  privacy_h:"BOBO சேமிக்காதது என்ன",privacy_intro:"வித்தியாசம் சேமிக்கப்படாத தரவில் தெரிகிறது.",
+  th_feature:"தரவு",th_others:"சாதாரண உலாவிகள்",
+  r1:"உலாவல் வரலாறு",r2:"மூடிய பிறகு குக்கீகள்",r3:"கடவுச்சொற்கள் மற்றும் படிவங்கள்",r4:"விளம்பர சுயவிவரம்",r5:"விற்பனையாளருக்கு தொலைமிதி",
+  v_no:"இல்லை",v_yes:"ஆம்",
+  download_h:"இப்போது பதிவிறக்கவும்",download_p:"BOBO Browser Windows மற்றும் Android க்கு கிடைக்கிறது.",
+  download_note:"பதிப்பு 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 அல்லது 11 · 4 GB RAM · 500 MB",plat_and_req:"Android 7.0+ · ~1.5 MB",
+  android_note:"பதிப்பு 1.5 · APK · ~1.5 MB",badge_beta:"பீட்டா",
+  install_h:"Bobo Browser எப்படி நிறுவுவது?",install_intro:"நிறுவல் ஒரு நிமிடத்திற்கும் குறைவாக எடுக்கும்.",
+  step1:"பச்சை பொத்தானை தொட்டு <strong>bobo_browser_1.5.apk</strong> பதிவிறக்கவும்.",
+  step2:"அறிவிப்பு பட்டியில் அல்லது <strong>கோப்புகள் / பதிவிறக்கங்கள்</strong> பயன்பாட்டில் இருந்து கோப்பை திறக்கவும்.",
+  step3:"<strong>«அறியப்படாத மூலங்கள்»</strong> தோன்றினால்:<span class=\"step-path\">Android 7–9: அமைப்புகள் → பாதுகாப்பு → அறியப்படாத மூலங்களிலிருந்து நிறுவல் அனுமதி\nAndroid 10+: அமைப்புகள் → பயன்பாடுகள் → அறியப்படாத பயன்பாடுகளை நிறுவ அனுமதி</span>",
+  step4:"<strong>«நிறுவு»</strong> தொடவும்.",step5:"முடிந்தது! தனியுரிமை உலாவலை அனுபவிக்கவும்.",
+  safety_text:"🛡️ <strong>பாதுகாப்பு குறிப்பு:</strong> Bobo Browser BoBo Soft இன் 100% பாதுகாப்பான பயன்பாடு. வைரஸ்கள், விளம்பரங்கள் அல்லது தரவு சேகரிப்பு இல்லை.",
+  footer_sub:"ஐரோப்பிய தனியுரிமை உலாவி · விளம்பரம் இல்லை · கண்காணிப்பு இல்லை"
+};
+
+/* ===== LËTZEBUERGESCH ===== */
+I18N.lb = {
+  page_title:"BOBO Browser — Privat surfen",
+  overlay_title:"Wielt Är Sprooch",
+  overlay_sub:"Dir kënnt dat méi spéit änneren",
+  overlay_cont:"Weider",
+  hero_tagline:"Am Internet surfen ass e privat Recht, keng Geleeënheet fir d'Benotzer ze monetiséieren.",
+  hero_sub:"PRIVATEN BROWSER · WINDOWS & ANDROID · GRATIS · OPEN-SOURCE",
+  btn_download:"Eroflueden fir Windows",
+  hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"Eroflueden fir Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"E Browser deen iech net verfollegt",
+  manifesto_p:"BOBO ass op engem einfache Prinzip opgebaut: wat Dir sicht a wou Dir surft gehéiert Iech. Keng Geschicht, keng dauerhaft Cookies, kee Profiling a keng Reklammen.",
+  features_h:"Wat BOBO anescht mécht",
+  f1_t:"Permanente private Modus",f1_d:"Keng Geschicht a keng dauerhaft Cookies. Bei Zoumaachen verschwënnt d'Sitzung komplett.",
+  f2_t:"Ouni Reklammen",f2_d:"Méi wéi 40 Reklammen-Domainen automatisch blockéiert.",
+  f3_t:"Ouni Tracking",f3_d:"BOBO schéckt keng Telemetrie a baut keng Profile.",
+  f4_t:"Privat Sich",f4_d:"DuckDuckGo ass de Standard-Sichmotor.",
+  f5_t:"49 Sproochen",f5_d:"Interface verfügbar a 49 Sproochen.",
+  f6_t:"Open-source",f6_d:"Ëffentleche Python Code.",
+  privacy_h:"Wat BOBO NET späichert",privacy_intro:"Den Ënnerscheed gëtt an de Daten gewise déi NET gespäichert ginn.",
+  th_feature:"Donnéeën",th_others:"Normal Browser",
+  r1:"Surfen-Geschicht",r2:"Cookies nom Zoumaachen",r3:"Passwierder a Formulairen",r4:"Reklammen-Profiling",r5:"Telemetrie beim Hiersteller",
+  v_no:"Nee",v_yes:"Jo",
+  download_h:"Elo eroflueden",download_p:"BOBO Browser ass fir Windows an Android verfügbar.",
+  download_note:"Versioun 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 oder 11 · 4 GB RAM · 500 MB",plat_and_req:"Android 7.0+ · ~1.5 MB",
+  android_note:"Versioun 1.5 · APK · ~1.5 MB",badge_beta:"BETA",
+  install_h:"Wéi installéiert een Bobo Browser?",install_intro:"D'Installatioun dauert manner wéi eng Minutt.",
+  step1:"Luet <strong>bobo_browser_1.5.apk</strong> erof andeems Dir op de grénge Knäppchen dréckt.",
+  step2:"Maacht d'Fichier vun der Notifikatiounsbar oder aus <strong>Fichieren / Downloads</strong> op.",
+  step3:"Fir <strong>«Onbekannte Quellen»</strong>:<span class=\"step-path\">Android 7–9: Astellungen → Sécherheet → Installatioun aus onbekannte Quellen erlaben\nAndroid 10+: Astellungen → Apps → Onbekannte Apps erlaben</span>",
+  step4:"Dréckt op <strong>«Installéieren»</strong>.",step5:"Fäerdeg! Genéisst de privaten Surfen.",
+  safety_text:"🛡️ <strong>Sécherheetshinweis:</strong> Bobo Browser ass eng sécher BoBo Soft App. Ouni Viren, Reklammen oder Datecollectioun.",
+  footer_sub:"EUROPÄESCHE PRIVATEN BROWSER · OUNI REKLAMMEN · OUNI TRACKING"
+};
+
+/* ===== SICILIANU ===== */
+I18N.scn = {
+  page_title:"BOBO Browser — Navigazioni privata",
+  overlay_title:"Scegghi la tua lingua",
+  overlay_sub:"Poi canciàrla dopu",
+  overlay_cont:"Cuntinua",
+  hero_tagline:"Navigari n'internet è un dirittu privatu, nun è n'occasioni pî fari sordi cû l'utenti.",
+  hero_sub:"NAVIGATURI PRIVATU · WINDOWS & ANDROID · GRATIS · OPEN-SOURCE",
+  btn_download:"Scarica pî Windows",
+  hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"Scarica pî Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"Un navigaturi chi nun ti segui",
+  manifesto_p:"BOBO è custruitu supra un principiu sèmplici: chiddu chi cerchi e unni navighi ti apparteni. Senza pubblicità, senza tracking, senza prufili.",
+  features_h:"Cosa fa BOBO diversu",
+  f1_t:"Modalità privata pirmànenti",f1_d:"Senza storia e cookies pirmànenti.",
+  f2_t:"Senza pubblicità",f2_d:"Chiù di 40 dòmini bluccati automaticamenti.",
+  f3_t:"Senza seguimentu",f3_d:"BOBO nun manna telemetria e nun fa prufili.",
+  f4_t:"Ricerca privata",f4_d:"DuckDuckGo è u mutori prediffinitu.",
+  f5_t:"49 lingui",f5_d:"Interfaccia in 49 lingui.",
+  f6_t:"Open-source",f6_d:"Codici Python pubblicu.",
+  privacy_h:"Cosa nun sarva BOBO",privacy_intro:"La diffirenzia si vidi ntâ dati chi nun si sàrvanu.",
+  th_feature:"Dati",th_others:"Navigatura ordinariu",
+  r1:"Storía di navigazzioni",r2:"Cookies doppu â chiusura",r3:"Passwords e fòrmuli",r4:"Prufilu pubblicitariu",r5:"Telemetria ô pruduttori",
+  v_no:"No",v_yes:"Sì",
+  download_h:"Scarica ora",download_p:"BOBO Browser è disponìbbili pî Windows e Android.",
+  download_note:"Verzioni 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 o 11 · 4 GB RAM · 500 MB",plat_and_req:"Android 7.0+ · ~1.5 MB",
+  android_note:"Verzioni 1.5 · APK · ~1.5 MB",badge_beta:"BETA",
+  install_h:"Comu si installa Bobo Browser?",install_intro:"L'installazioni dura menu di un minutu.",
+  step1:"Scarica <strong>bobo_browser_1.5.apk</strong> preminnu û buttuni virdi.",
+  step2:"Avri û file dâ barra di nutificazzioni o dâ <strong>File / Scaricati</strong>.",
+  step3:"Sicurizza pî <strong>«Funti scanusciuti»</strong>:<span class=\"step-path\">Android 7–9: Mpustazioni → Sicurizza → Permetti sorgenti scanusciuti\nAndroid 10+: Mpustazioni → App → Permetti app scanusciuti</span>",
+  step4:"Pigi <strong>«Installa»</strong>.",step5:"Prontu! Sicurizza la tua navigazzioni privata.",
+  safety_text:"🛡️ <strong>Nota di sicurizza:</strong> Bobo Browser è un'app sicura di BoBo Soft. Senza virus, pubblicitati o raccolta dati.",
+  footer_sub:"NAVIGATURI PRIVATU EURUPEU · SENZA PUBBLICITÀ · SENZA SEGUIMENTU"
+};
+
+/* ===== LADIN ===== */
+I18N.lad = {
+  page_title:"BOBO Browser — Navigazion privata",
+  overlay_title:"Tlì la toa rujeneda",
+  overlay_sub:"Pois cianciè do",
+  overlay_cont:"Tò ite",
+  hero_tagline:"Navigé tl'internet ie n dërt privat, nia n'ucajion per guadagné dai utënc.",
+  hero_sub:"BROWSER PRIVAT · WINDOWS & ANDROID · GRATIS · OPEN-SOURCE",
+  btn_download:"Descarié por Windows",
+  hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"Descarié por Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"N browser che no te segue",
+  manifesto_p:"BOBO ie fat sun n prinzip sëmpl: chël che cerches y ulà che navighes t'appartën. Zënza publicità, zënza seguimënt, zënza profils.",
+  features_h:"Chël che fej BOBO divers",
+  f1_t:"Modalità privata permaënta",f1_d:"Zënza storia y cookies permaënc.",
+  f2_t:"Zënza publicità",f2_d:"Plu de 40 dominies blocá automaticamënter.",
+  f3_t:"Zënza seguimënt",f3_d:"BOBO no manda telemetria y no fej profils.",
+  f4_t:"Ciaminada privata",f4_d:"DuckDuckGo ie l motor de default.",
+  f5_t:"49 rujenedes",f5_d:"Interfacia en 49 rujenedes.",
+  f6_t:"Open-source",f6_d:"Codesc Python publich.",
+  privacy_h:"Chël che BOBO no salva",privacy_intro:"La diferënza se veid tl dac che no vën tignü.",
+  th_feature:"Dac",th_others:"Browsers ordinars",
+  r1:"Storia de navigazion",r2:"Cookies do la sareda",r3:"Parores y formulars",r4:"Profil pubblicitare",r5:"Telemetria al produtëur",
+  v_no:"No",v_yes:"Sì",
+  download_h:"Descarié dërt",download_p:"BOBO Browser ie disponibel por Windows y Android.",
+  download_note:"Verziun 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 o 11 · 4 GB RAM · 500 MB",plat_and_req:"Android 7.0+ · ~1.5 MB",
+  android_note:"Verziun 1.5 · APK · ~1.5 MB",badge_beta:"BETA",
+  install_h:"Co s'instala Bobo Browser?",install_intro:"L'instalazion dura manco de n minuto.",
+  step1:"Descarié <strong>bobo_browser_1.5.apk</strong> premiun l boton vërt.",
+  step2:"Duvrez l file dâ nuzificazions o dai <strong>Files / Descarics</strong>.",
+  step3:"Por <strong>«Fontes desconossudes»</strong>:<span class=\"step-path\">Android 7–9: Segurëza → Instala da fontes desconossudes\nAndroid 10+: Aplicazions → Permet aplicazions desconossudes</span>",
+  step4:"Clicé su <strong>«Instala»</strong>.",step5:"Fat! Gode la navigazion privata.",
+  safety_text:"🛡️ <strong>Nota de segurëza:</strong> Bobo Browser ie n'aplicazion segura de BoBo Soft. Zënza virus, publicità o racoiüda de dac.",
+  footer_sub:"BROWSER PRIVAT EUROPEICH · ZËNZA PUBLICITÀ · ZËNZA SEGUIMËNT"
+};
+
+/* ===== ARMÂNEASHTI ===== */
+I18N.aro = {
+  page_title:"BOBO Browser — Nãvigari privatã",
+  overlay_title:"Aliedzi limba",
+  overlay_sub:"Poț s-u mutrești ma tãrdzãu",
+  overlay_cont:"Treaţã",
+  hero_tagline:"Nãvigarea pi internet easti un drept privat, nu un prieliu di monetizari a utilizatórilor.",
+  hero_sub:"BRAWZER PRIVAT · WINDOWS & ANDROID · HÃRÃZIT · OPEN-SOURCE",
+  btn_download:"Discarcã trã Windows",
+  hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"Discarcã trã Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"Un brawzer cari nu ti bãgã di-aproapea",
+  manifesto_p:"BOBO easti faptu pi un principiu simplu: tsi caști shi iu nãvighești aț apartini. Fãrã isturii, fãrã reclami, fãrã urmãriri.",
+  features_h:"Tsi fac BOBO diferit",
+  f1_t:"Modu privat tut chirolu",f1_d:"Fãrã isturii shi reclami pirmãninti.",
+  f2_t:"Fãrã reclami",f2_d:"Pisti 40 domeni blocati automat.",
+  f3_t:"Fãrã urmãriri",f3_d:"BOBO nu trimiti telemetrii shi nu fatsi profili.",
+  f4_t:"Cãftari privatã",f4_d:"DuckDuckGo easti motoru standard.",
+  f5_t:"49 limbi",f5_d:"Interfatsã tu 49 di limbi.",
+  f6_t:"Open-source",f6_d:"Cod Python public.",
+  privacy_h:"Tsi NU ãngroapã BOBO",privacy_intro:"Diferentsa si veadi tu datili cari NU suntu pãdzãti.",
+  th_feature:"Dati",th_others:"Brawzeri obicinuiti",
+  r1:"Isturie di nãvigari",r2:"Reclami dupã nchidiri",r3:"Paroli shi formulari",r4:"Profilari publicistã",r5:"Telemetrii trã produtsitur",
+  v_no:"Nu",v_yes:"Iu",
+  download_h:"Discarcã tora",download_p:"BOBO Browser easti disponibil trã Windows shi Android.",
+  download_note:"Versioni 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 icã 11 · 4 GB RAM · 500 MB",plat_and_req:"Android 7.0+ · ~1.5 MB",
+  android_note:"Versioni 1.5 · APK · ~1.5 MB",badge_beta:"BETA",
+  install_h:"Cum s-instalezi Bobo Browser?",install_intro:"Instalarea ari mãnã di un minut.",
+  step1:"Discarcã <strong>bobo_browser_1.5.apk</strong> cu apãsarea butonulu virdi.",
+  step2:"Anveardi fișirul discãrcat di la nãvigãri icã <strong>Fișiri / Discãrcãri</strong>.",
+  step3:"Trã <strong>«Sursi necunuscuti»</strong>:<span class=\"step-path\">Android 7–9: Asigurari → Instaleadzã di la sursi necunuscuti\nAndroid 10+: Aplicații → Permiti aplicații necunuscuti</span>",
+  step4:"Apasã <strong>«Instalează»</strong>.",step5:"Gata! Bucurã-ti di nãvigarea privatã.",
+  safety_text:"🛡️ <strong>Asigurari:</strong> Bobo Browser easti un aplicatiu sigur di BoBo Soft. Fãrã viruși, reclami icã adunarã di dati.",
+  footer_sub:"BRAWZER PRIVAT EVROPEAN · FÃRÃ RECLAMI · FÃRÃ URMÃRIRI"
+};
+
+/* ===== ייִדיש (RTL) ===== */
+I18N.yi = {
+  page_title:"BOBO Browser — פּריוואַטע בלעטערונג",
+  overlay_title:"קלייב דיין שפּראַך",
+  overlay_sub:"מע קען דאָס שפּעטער בייטן",
+  overlay_cont:"ווייטער",
+  hero_tagline:"אינטערנעט בלעטערן איז אַ פּריוואַטע רעכט, ניט קיין מעגלעכקייט צו פֿאַרדינען פֿון ניצערס.",
+  hero_sub:"פּריוואַטער בלעטערער · WINDOWS & ANDROID · גראַטיס · OPEN-SOURCE",
+  btn_download:"אַראָפּלאָדן פֿאַר Windows",
+  hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"אַראָפּלאָדן פֿאַר Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"אַ בלעטערער וואָס נאָכגייט אײַך ניט",
+  manifesto_p:"BOBO איז אויפֿגעבויט אויף אַ פּשוטן פּרינציפּ: וואָס איר זוכט און וווּ איר בלעטערט — גיהערט אײַך. אָן רעקלאַמעס, אָן נאָכפֿאָלגן, אָן פּראָפֿילן.",
+  features_h:"וואָס מאַכט BOBO אַנדערש",
+  f1_t:"פּריוואַטע בלעטערונג",f1_d:"אָן געשיכטע און דויערנדיקע קוקיס.",
+  f2_t:"אָן רעקלאַמעס",f2_d:"מער ווי 40 דאָמיינס אויטאָמאַטיש בלאָקירט.",
+  f3_t:"אָן נאָכפֿאָלגן",f3_d:"BOBO שיקט קיין טעלעמעטריע ניט.",
+  f4_t:"פּריוואַטע זוכן",f4_d:"DuckDuckGo איז דער שטאַנדאַרד מאָטאָר.",
+  f5_t:"49 שפּראַכן",f5_d:"צוגאַנג אין 49 שפּראַכן.",
+  f6_t:"Open-source",f6_d:"עפֿנטלעכער Python קאָד.",
+  privacy_h:"וואָס BOBO ניט היט",privacy_intro:"דער חילוק זעט זיך אין דאַטן וואָס ווערן ניט באַהאַלטן.",
+  th_feature:"דאַטן",th_others:"גיוויינלעכע בלעטערערס",
+  r1:"בלעטערונג-געשיכטע",r2:"קוקיס נאָכן פֿאַרמאַכן",r3:"פּאַסווערטן און פֿאָרמולאַרן",r4:"רעקלאַמע-פּראָפֿיל",r5:"טעלעמעטריע צום פּראָדוצענט",
+  v_no:"ניין",v_yes:"יאָ",
+  download_h:"אַראָפּלאָדן יעצט",download_p:"BOBO Browser איז פֿאַראַן פֿאַר Windows און Android.",
+  download_note:"ווערסיע 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 אָדער 11 · 4 GB RAM · 500 MB",plat_and_req:"Android 7.0+ · ~1.5 MB",
+  android_note:"ווערסיע 1.5 · APK · ~1.5 MB",badge_beta:"בעטאַ",
+  install_h:"ווי אַזוי אינסטאַלירן Bobo Browser?",install_intro:"די אינסטאַלאַציע נעמט ווייניקער ווי אַ מינוט.",
+  step1:"אַראָפּלאָדן <strong>bobo_browser_1.5.apk</strong> דורכן גרינעם קנעפּל.",
+  step2:"עפֿנט דעם דאַונלאָדעד פֿיל פֿון נאָטיפֿיקאַציע-לייסט אָדער <strong>פֿיילן / אַראָפּלאָדנס</strong>.",
+  step3:"פֿאַר <strong>«אומבאַקאַנטע קוואַלן»</strong>:<span class=\"step-path\">Android 7–9: סעטינגס → זיכערהייט → דערלויבן אומבאַקאַנטע קוואַלן\nAndroid 10+: סעטינגס → אַפּס → דערלויבן אומבאַקאַנטע אַפּס</span>",
+  step4:"דריקט <strong>«אינסטאַלירן»</strong>.",step5:"גרייט! הנאה פֿון פּריוואַטן בלעטערן.",
+  safety_text:"🛡️ <strong>זיכערהייט-הערה:</strong> Bobo Browser איז אַ זיכערע BoBo Soft אַפּ. אָן ווירוסן, רעקלאַמעס אָדער דאַטן-זאַמלונג.",
+  footer_sub:"אייראָפּעיִשער פּריוואַטער בלעטערער · אָן רעקלאַמעס · אָן נאָכפֿאָלגן"
+};
+
+/* ===== KASZËBSCZI ===== */
+I18N.csb = {
+  page_title:"BOBO Browser — Priwatné brawzowanié",
+  overlay_title:"Wëbierzë swòjã gôdkã",
+  overlay_sub:"Mòżesz to pòzmieniec pózni",
+  overlay_cont:"Nadalëgò",
+  hero_tagline:"Brawzowanié internetu je priwatné prawò, nie leżnoscë nen zarobianié na brëkòwnikach.",
+  hero_sub:"PRIWATNY BRAWZER · WINDOWS & ANDROID · BÉZGRATIS · OPEN-SOURCE",
+  btn_download:"Sćãgni dlô Windows",
+  hero_note:"v1.5 · Windows 10/11",
+  btn_download_android:"Sćãgni dlô Android",
+  hero_note_android:"v1.5 · Android 7.0+ · APK · ~1.5 MB",
+  manifesto_h:"Brawzer jaczi ce nie sledzã",
+  manifesto_p:"BOBO je zrobiłi na prostim spòsóbie: to czegò szukôsz i gdze brawzëjesz je twòje. Bez reklam, bez sledzeniô, bez profilów.",
+  features_h:"Co robi BOBO jinszim",
+  f1_t:"Wiedno priwatny mòdus",f1_d:"Bez historii i trwałich ciasteczków.",
+  f2_t:"Bez reklam",f2_d:"Wicy jak 40 domen automaticzno blokòwanim.",
+  f3_t:"Bez sledzeniô",f3_d:"BOBO nie sëłô telemetrii i nie budëje profilów.",
+  f4_t:"Priwatné szëkanié",f4_d:"DuckDuckGo je standardowi szëkôcz.",
+  f5_t:"49 gôdków",f5_d:"Interfejs w 49 gôdkach.",
+  f6_t:"Open-source",f6_d:"Jawny kòd Python.",
+  privacy_h:"Co BOBO nie zachòwiwô",privacy_intro:"Rozmajiczosc widac w danych jaczi nie są zachòwiwóné.",
+  th_feature:"Dane",th_others:"Zwëczajné brawzeri",
+  r1:"Historëjô brawzowaniô",r2:"Ciasteczka pò zamkniãcu",r3:"Hasła i formularze",r4:"Reklamòwé profilowanié",r5:"Telemetrëjô dlô wëtworce",
+  v_no:"Nie",v_yes:"Tak",
+  download_h:"Sćãgni terô",download_p:"BOBO Browser je dlô Windows i Android.",
+  download_note:"Wersjô 1.5 · ~131 MB",plat_win_title:"Windows",
+  plat_win_req:"Windows 10 abò 11 · 4 GB RAM · 500 MB",plat_and_req:"Android 7.0+ · ~1.5 MB",
+  android_note:"Wersjô 1.5 · APK · ~1.5 MB",badge_beta:"BETA",
+  install_h:"Jak winstalowac Bobo Browser?",install_intro:"Instalacjô trwô mni jak minëtã.",
+  step1:"Sćãgni <strong>bobo_browser_1.5.apk</strong> przënôszającë na zelony przëcësk.",
+  step2:"Òtwòrzë sćãgniãti file ze ògłoszeń abò <strong>Filë / Sćãgniãté</strong>.",
+  step3:"Bezpiekòtã dlô <strong>«Nieznóné zdrojë»</strong>:<span class=\"step-path\">Android 7–9: Ùsôwczi → Bezpiekòtã → Sćãganié z nieznónich zdrojów\nAndroid 10+: Ùsôwczi → Apkacje → Dopusc nieznóné apkacje</span>",
+  step4:"Kliknë <strong>«Winstalëj»</strong>.",step5:"Gòtowé! Kòrzëstôj z priwatnego brawzowaniô.",
+  safety_text:"🛡️ <strong>Bezpiekòtã:</strong> Bobo Browser to bezpiecznô apkacjô BoBo Soft. Bez wirusów, reklam abò zbiéraniô danëch.",
+  footer_sub:"EUROPEJSCZI PRIWATNY BRAWZER · BEZ REKLAM · BEZ SLEDZENIÔ"
+};
+
+/* ============================================================
+   CORE FUNCTIONS
+   ============================================================ */
+
+var _pendingLang = null;
+var _curLang = "ro";
+
+/* Get translation with English fallback */
+function T(lang, key) {
+  var d = I18N[lang];
+  if (d && d[key] !== undefined) return d[key];
+  return (I18N.en && I18N.en[key] !== undefined) ? I18N.en[key] : "";
 }
 
-setLang("ro");
+/* Find lang metadata */
+function langMeta(code) {
+  for (var gi = 0; gi < LANG_GROUPS.length; gi++) {
+    var g = LANG_GROUPS[gi];
+    for (var li = 0; li < g.langs.length; li++) {
+      if (g.langs[li].c === code) return g.langs[li];
+    }
+  }
+  return null;
+}
+
+/* Apply language to entire page */
+function applyLang(lang) {
+  if (!I18N[lang]) lang = "en";
+  _curLang = lang;
+  var isRTL = !!RTL_SET[lang];
+
+  document.documentElement.lang = lang;
+  document.documentElement.dir = isRTL ? "rtl" : "ltr";
+  document.title = T(lang, "page_title");
+
+  document.querySelectorAll("[data-i18n]").forEach(function(el) {
+    var k = el.getAttribute("data-i18n");
+    var v = T(lang, k);
+    if (v) el.textContent = v;
+  });
+  document.querySelectorAll("[data-i18n-html]").forEach(function(el) {
+    var k = el.getAttribute("data-i18n-html");
+    var v = T(lang, k);
+    if (v) el.innerHTML = v;
+  });
+
+  /* Update nav button */
+  var meta = langMeta(lang);
+  if (meta) {
+    document.getElementById("lb-flag").textContent = meta.f;
+    document.getElementById("lb-code").textContent = meta.c.toUpperCase();
+  }
+
+  /* Update active state in dropdown */
+  document.querySelectorAll(".dd-item").forEach(function(el) {
+    el.classList.toggle("act", el.dataset.lang === lang);
+  });
+
+  localStorage.setItem("bobo_lang", lang);
+}
+
+/* ============================================================
+   OVERLAY
+   ============================================================ */
+function buildOverlay() {
+  var wrap = document.getElementById("ov-grid-wrap");
+  var html = "";
+  for (var gi = 0; gi < LANG_GROUPS.length; gi++) {
+    var g = LANG_GROUPS[gi];
+    html += "<div class=\"ov-group-hdr\">" + g.g + "</div>";
+    html += "<div class=\"ov-lang-grid\">";
+    for (var li = 0; li < g.langs.length; li++) {
+      var l = g.langs[li];
+      html += "<button class=\"ov-btn\" data-lang=\"" + l.c + "\" onclick=\"selectOvLang('" + l.c + "')\">" +
+        "<span class=\"ob-flag\">" + l.f + "</span>" +
+        "<span class=\"ob-name\">" + l.n + "</span>" +
+        "</button>";
+    }
+    html += "</div>";
+  }
+  wrap.innerHTML = html;
+}
+
+function selectOvLang(code) {
+  _pendingLang = code;
+  document.querySelectorAll(".ov-btn").forEach(function(el) {
+    el.classList.toggle("sel", el.dataset.lang === code);
+  });
+  var btn = document.getElementById("ov-continue");
+  btn.classList.add("ready");
+  /* Update overlay UI text to selected language */
+  document.getElementById("ov-title").textContent = T(code, "overlay_title");
+  document.getElementById("ov-sub").textContent = T(code, "overlay_sub");
+  btn.textContent = T(code, "overlay_cont");
+  /* Scroll selected button into view */
+  var sel = document.querySelector(".ov-btn.sel");
+  if (sel) sel.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+function confirmLang() {
+  if (!_pendingLang) return;
+  document.getElementById("lang-overlay").style.display = "none";
+  applyLang(_pendingLang);
+}
+
+/* ============================================================
+   DROPDOWN
+   ============================================================ */
+function buildDropdown() {
+  var drop = document.getElementById("lang-drop");
+  var html = "";
+  for (var gi = 0; gi < LANG_GROUPS.length; gi++) {
+    var g = LANG_GROUPS[gi];
+    html += "<div class=\"dd-group\">" + g.g + "</div>";
+    for (var li = 0; li < g.langs.length; li++) {
+      var l = g.langs[li];
+      html += "<div class=\"dd-item\" data-lang=\"" + l.c + "\" onclick=\"chooseLang('" + l.c + "')\">" +
+        "<span class=\"di-flag\">" + l.f + "</span>" +
+        "<span class=\"di-name\">" + l.n + "</span>" +
+        "<span class=\"di-code\">" + l.c.toUpperCase() + "</span>" +
+        "</div>";
+    }
+  }
+  drop.innerHTML = html;
+}
+
+function toggleDrop(e) {
+  e.stopPropagation();
+  document.getElementById("lang-drop").classList.toggle("open");
+  document.getElementById("lang-btn").classList.toggle("open");
+}
+
+function chooseLang(code) {
+  applyLang(code);
+  document.getElementById("lang-drop").classList.remove("open");
+  document.getElementById("lang-btn").classList.remove("open");
+}
+
+document.addEventListener("click", function() {
+  document.getElementById("lang-drop").classList.remove("open");
+  document.getElementById("lang-btn").classList.remove("open");
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+(function init() {
+  buildDropdown();
+
+  var saved = localStorage.getItem("bobo_lang");
+  if (saved && I18N[saved]) {
+    /* Already chose language — hide overlay, apply language */
+    document.getElementById("lang-overlay").style.display = "none";
+    applyLang(saved);
+  } else {
+    /* First visit — show overlay */
+    buildOverlay();
+    /* Detect browser language */
+    var bl = ((navigator.language || (navigator.languages && navigator.languages[0]) || "en")).toLowerCase();
+    var blShort = bl.split("-")[0];
+    var detected = null;
+    for (var gi = 0; gi < LANG_GROUPS.length; gi++) {
+      for (var li = 0; li < LANG_GROUPS[gi].langs.length; li++) {
+        var lc = LANG_GROUPS[gi].langs[li].c;
+        if (lc === blShort || lc === bl) { detected = lc; break; }
+      }
+      if (detected) break;
+    }
+    /* Show overlay text in detected (or English) */
+    var uiLang = detected || "en";
+    document.getElementById("ov-title").textContent = T(uiLang, "overlay_title");
+    document.getElementById("ov-sub").textContent = T(uiLang, "overlay_sub");
+    document.getElementById("ov-continue").textContent = T(uiLang, "overlay_cont");
+    /* Pre-select detected language */
+    if (detected) {
+      selectOvLang(detected);
+    }
+  }
+})();
 </script>
 
 </body>
